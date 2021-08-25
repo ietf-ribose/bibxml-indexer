@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  redis:
+    image: redis
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A indexer worker -l info
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASS=postgres
+    depends_on:
+      - db
+      - redis
+      - web
