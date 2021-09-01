@@ -1,25 +1,28 @@
 version: "3.9"
 
 services:
+  redis:
+    image: redis
+
   db:
     image: postgres
     volumes:
       - ./data/db:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-
-  redis:
-    image: redis
+    env_file:
+      - ./.env.dev
+    hostname: db
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command:
+     python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
+    hostname: web-indexer
     ports:
-      - "8000:8000"
+      - "8001:8000"
+    env_file:
+      - ./.env.dev
     depends_on:
       - db
 
@@ -30,11 +33,15 @@ services:
     command: celery -A indexer worker -l info
     volumes:
       - ./data/db:/var/lib/postgresql/data
-    environment:
-      - DB_NAME=postgres
-      - DB_USER=postgres
-      - DB_PASS=postgres
+    env_file:
+      - ./.env.dev
+      - ./.celery.env.dev
     depends_on:
       - db
       - redis
       - web
+
+networks:
+  default:
+    external: true
+    name: bibxml_network

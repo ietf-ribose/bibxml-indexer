@@ -11,21 +11,24 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from os import environ
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-q4_kr2n^074)_xpl=e+8(eult(w$hbyry&=ba+se_xo*piq2_@'
+SECRET_KEY = environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(environ.get("DJANGO_DEBUG", default=0))
 
-ALLOWED_HOSTS = []
+# 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
+# For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
+ALLOWED_HOSTS = environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 
 # Application definition
@@ -76,8 +79,12 @@ WSGI_APPLICATION = 'indexer.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': environ.get('DJANGO_DATABASE'),
+        'USER': environ.get('DJANGO_DATABASE_USER'),
+        'PASSWORD': environ.get('DJANGO_DATABASE_PASSWORD'),
+        'HOST': environ.get('DJANGO_DATABASE_HOST'),
+        'PORT': int(environ.get("DJANGO_DATABASE_PORT", default=5432)),
     }
 }
 
@@ -125,6 +132,7 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CELERY_BROKER_URL = environ.get('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = environ.get('CELERY_RESULT_BACKEND')
 
-CELERY_BROKER_URL = "redis://redis:6379"
-CELERY_RESULT_BACKEND = "redis://redis:6379"
+PATH_TO_DATA_DIR = environ.get('PATH_TO_DATA_DIR')

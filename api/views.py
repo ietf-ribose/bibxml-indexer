@@ -6,10 +6,15 @@ from .tasks import start_index
 def index(request):
     return HttpResponse("API v1 index")
 
+from celery.result import AsyncResult
 
-def check_task(request, id):
+
+def check_task(request, task_id):
     # TODO:
     # implement celery task check
+
+    # res = AsyncResult(task_id)
+    # res.ready()
 
     return JsonResponse({
         "data":  []
