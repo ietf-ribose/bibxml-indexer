@@ -1,0 +1,170 @@
+openapi: 3.0.1
+
+info:
+  title: BibXML datasets indexer
+  description: This is BibXML indexer API
+  contact:
+    email: open.source@ribose.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 0.0.1
+
+servers:
+- url: http://localhost:8001/api/v1
+
+paths:
+  /indexer/{dataset}/run:
+    get:
+      summary: Run Indexer task for a dataset
+      description: Creates Celery task that runs indexer for chosen datasets if it
+        possible
+      operationId: runIndexer
+      parameters:
+      - name: dataset
+        in: path
+        description: Name of dataset to index
+        required: true
+        schema:
+          $ref: '#/components/schemas/IndexableDatasets'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexerSuccess'
+        404:
+          description: Unknown dataset to index
+          content: {}
+
+        500:
+          description: operation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexerError'
+
+  /indexer/{dataset}/stop:
+    get:
+      summary: Stop Indexer task for a dataset if it possible
+      description: Stops celery indexer task for chosen dataset if it running
+      operationId: stopIndexer
+      parameters:
+      - name: dataset
+        in: path
+        description: Name of indexing dataset
+        required: true
+        schema:
+          $ref: '#/components/schemas/IndexableDatasets'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexerStatus'
+
+        404:
+          description: Unknown dataset to index
+          content: {}
+
+        500:
+          description: operation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexerError'
+
+
+  /indexer/{dataset}/status:
+    get:
+      summary: Shows Indexer task status for selected dataset
+      description: Shows celery indexer task status
+      operationId: indexerStatus
+      parameters:
+      - name: dataset
+        in: path
+        description: Name of indexing dataset
+        required: true
+        schema:
+          $ref: '#/components/schemas/IndexableDatasets'
+      responses:
+        200:
+          $ref: '#/components/schemas/IndexerStatus'
+        404:
+          description: Unknown dataset to index
+          content: {}
+
+components:
+
+  schemas:
+
+    IndexableDatasets:
+      type: string
+      enum:
+      - ecma
+      - nist
+      - ietf
+      - itu-r
+      - calconnect
+      - cie
+      - iso
+      - bipm
+      - iho
+
+    IndexerSuccess:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/IndexerStatus'
+
+    IndexerError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+              description: Code for automatic error processing
+            message:
+              type: string
+              description: Human readable error message
+
+    IndexerStatus:
+      type: object
+      properties:
+        dataset:
+          type: string
+          description: Indexing dataset name
+        task_id:
+          type: string
+          format: uuid
+          description: Celery task ID
+        last_run:
+          type: object
+          properties:
+            started:
+              type: string
+              format: datetime
+              description: Task start timestamp
+            stopped:
+              type: string
+              format: datetime
+              description: Task stop timestamp
+            is_successful:
+              type: boolean
+              description: True, if this task completed successfully
+            message:
+              type: string
+              description: Human readable results of this run
+
+        status:
+          type: string
+          description: Indexer Status
+          enum:
+          - never_started
+          - running
+          - completed
+          - failed
