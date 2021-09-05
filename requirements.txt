@@ -1,5 +1,6 @@
-Django>=3.0,<4.0
+django>=3.0,<4.0
 psycopg2-binary>=2.8
-celery>=4
-redis>=3,<4.0
+celery>=4.0,<5.0
+redis>=3.0,<4.0
 pyyaml>=5.4
+gitpython>=3.1,<4.0

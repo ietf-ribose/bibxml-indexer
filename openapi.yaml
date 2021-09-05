@@ -8,7 +8,7 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  version: 0.0.1
+  version: 0.0.2
 
 servers:
 - url: http://localhost:8001/api/v1
@@ -33,7 +33,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IndexerSuccess'
+                $ref: '#/components/schemas/SuccessMessage'
         404:
           description: Unknown dataset to index
           content: {}
@@ -43,7 +43,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IndexerError'
+                $ref: '#/components/schemas/ErrorMessage'
 
   /indexer/{dataset}/stop:
     get:
@@ -57,13 +57,14 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/IndexableDatasets'
+
       responses:
         200:
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IndexerStatus'
+                $ref: '#/components/schemas/SuccessMessage'
 
         404:
           description: Unknown dataset to index
@@ -74,7 +75,40 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IndexerError'
+                $ref: '#/components/schemas/ErrorMessage'
+
+  /indexer/{dataset}/reset:
+    get:
+      summary: Reset Indexer task for a dataset and delete all records at DB
+      description: Stops celery indexer task for chosen dataset if it running 
+        and delete all indexed records at database
+      operationId: resetIndexer
+      parameters:
+      - name: dataset
+        in: path
+        description: Name of indexing dataset
+        required: true
+        schema:
+          $ref: '#/components/schemas/IndexableDatasets'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+
+        404:
+          description: Unknown dataset to index
+          content: {}
+
+        500:
+          description: operation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+
 
 
   /indexer/{dataset}/status:
@@ -91,7 +125,11 @@ paths:
           $ref: '#/components/schemas/IndexableDatasets'
       responses:
         200:
-          $ref: '#/components/schemas/IndexerStatus'
+          description: successful operation, shows index current status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexerStatus'
         404:
           description: Unknown dataset to index
           content: {}
@@ -113,13 +151,17 @@ components:
       - bipm
       - iho
 
-    IndexerSuccess:
+    SuccessMessage:
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/IndexerStatus'
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: Human readable success message
 
-    IndexerError:
+    ErrorMessage:
       type: object
       properties:
         error:
@@ -132,39 +174,35 @@ components:
               type: string
               description: Human readable error message
 
+
     IndexerStatus:
       type: object
       properties:
-        dataset:
-          type: string
-          description: Indexing dataset name
         task_id:
           type: string
           format: uuid
           description: Celery task ID
-        last_run:
-          type: object
-          properties:
-            started:
-              type: string
-              format: datetime
-              description: Task start timestamp
-            stopped:
-              type: string
-              format: datetime
-              description: Task stop timestamp
-            is_successful:
-              type: boolean
-              description: True, if this task completed successfully
-            message:
-              type: string
-              description: Human readable results of this run
-
+        indexed_files:
+          type: integer
+          description: Counter of processed YAML files
+        started_at:
+          type: string
+          format: datetime
+          description: Task start timestamp
+        stopped_at:
+          type: string
+          format: datetime
+          description: Task stop timestamp
+        message:
+          type: string
+          description: Human readable results of this run
+        commit:
+          type: string
+          description: Hex of HEAD commit of indexing dataset
         status:
           type: string
           description: Indexer Status
           enum:
-          - never_started
           - running
           - completed
           - failed

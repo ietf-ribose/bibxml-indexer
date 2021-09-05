@@ -135,4 +135,55 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CELERY_BROKER_URL = environ.get('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = environ.get('CELERY_RESULT_BACKEND')
 
+REDIS_HOST = environ.get('REDIS_HOST', 'redis')
+REDIS_PORT = environ.get('REDIS_PORT', 6379)
+
 PATH_TO_DATA_DIR = environ.get('PATH_TO_DATA_DIR')
+
+RELATON_DATASETS = {
+    "ecma": {
+            "git_remote_url": "git://github.com/relaton/relaton-data-ecma.git",
+            "git_branch": "master",
+            "local_repo_dir": "relaton-data-ecma"
+        },
+    "nist": {
+            "git_remote_url": "git://github.com/relaton/relaton-data-nist.git",
+            "git_branch": "main",
+            "local_repo_dir": "relaton-data-nist"
+        },
+    "ietf": {
+            "git_remote_url": "git://github.com/relaton/relaton-data-ietf.git",
+            "git_branch": "main",
+            "local_repo_dir": "relaton-data-ietf"
+        },
+    "itu-r": {
+            "git_remote_url": "git://github.com/relaton/relaton-data-itu-r.git",
+            "git_branch": "master",
+            "local_repo_dir": "relaton-data-itu-r"
+        },
+    "calconnect": {
+            "git_remote_url": "git://github.com/relaton/relaton-data-calconnect.git",
+            "git_branch": "main",
+            "local_repo_dir": "relaton-data-calconnect"
+        },
+    "cie": {
+            "git_remote_url": "git://github.com/relaton/relaton-data-cie.git",
+            "git_branch": "master",
+            "local_repo_dir": "relaton-data-cie"
+        },
+    "iso": {
+            "git_remote_url": "git://github.com/relaton/relaton-data-iso.git",
+            "git_branch": "main",
+            "local_repo_dir": "relaton-data-iso"
+        },
+    "bipm": {
+            "git_remote_url": "git://github.com/relaton/relaton-data-bipm.git",
+            "git_branch": "master",
+            "local_repo_dir": "relaton-data-bipm"
+        },
+    "iho": {
+            "git_remote_url": "git://github.com/relaton/relaton-data-iho.git",
+            "git_branch": "master",
+            "local_repo_dir": "relaton-data-iho"
+        },
+}

@@ -12,19 +12,20 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='BibData',
+            name='RefData',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('bib_id', models.CharField(max_length=64)),
-                ('bib_type', models.CharField(max_length=16)),
+                ('ref_id', models.CharField(max_length=64)),
+                ('ref_type', models.CharField(max_length=24)),
+                ('dataset', models.CharField(max_length=24)),
                 ('body', models.JSONField(verbose_name='body')),
             ],
             options={
-                'db_table': 'api_bib_data',
+                'db_table': 'api_ref_data',
             },
         ),
         migrations.AddConstraint(
-            model_name='bibdata',
-            constraint=models.UniqueConstraint(fields=('bib_id', 'bib_type'), name='unique_bib_id'),
+            model_name='refdata',
+            constraint=models.UniqueConstraint(fields=('ref_id', 'dataset'), name='unique_dataset_id'),
         ),
     ]
