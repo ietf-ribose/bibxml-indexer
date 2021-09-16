@@ -90,18 +90,12 @@ def _do_indexation(dataset_name, data_dir):
                     ref_data = yaml.load(
                         fhandler.read(), Loader=yaml.SafeLoader
                     )
-                    ref_id = ref_data.get("id", None)
-                    ref_type = ref_data.get("type", None)
 
-                    if not ref_type:
-                        ref_type = ref_data.get("doctype", None)
+                    docid = ref_data.get("docid", None)
+                    ref_type = ref_data.get("doctype", None)
 
-                    # no ID in iho dataset
-                    # if not bib_id:
-                    #    docid = ref_data.get("docid", None)
-
-                    #    if docid:
-                    #        ref_id = docid.get("id", None)
+                    if docid:
+                        ref_id = docid.get("id", None)
 
                     if ref_id:
                         exists_ids.append(ref_id)
@@ -115,12 +109,17 @@ def _do_indexation(dataset_name, data_dir):
                         i += 1
 
                         RD.hset(dataset_name, "indexed_files", i)
+                    else:
+                        # TODO:
+                        # write error to log?
+                        pass
 
                 except Exception as err:
                     # log()
                     # print(bib_id, ref_data, err)
                     pass
 
+        # Remove all objects of this dataset (except indexed now)
         RefData.objects.filter(dataset=dataset_name).exclude(
             ref_id__in=exists_ids
         ).delete()
@@ -240,6 +239,8 @@ def reset_indexation(dataset_name):
 
     stop_indexation(dataset_name)
     RefData.objects.filter(dataset=dataset_name).delete()
+    # TODO:
+    # remove git repo?
 
 
 def stop_indexation(dataset_name):
