@@ -97,9 +97,9 @@ def api_indexer_status(request, dataset_name):
 
 def api_list_indexers(request):
 
-    _indexable_datasets = {}
+    indexable_datasets = {}
 
     for _name in settings.RELATON_DATASETS:
-        _indexable_datasets[_name] = get_index_info(_name)
+        indexable_datasets[_name] = get_index_info(_name)
 
-    return JsonResponse({"data": _indexable_datasets})
+    return JsonResponse({"data": indexable_datasets})
