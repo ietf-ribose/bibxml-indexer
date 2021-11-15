@@ -91,6 +91,8 @@ def _do_indexation(dataset_name, data_dir):
                         fhandler.read(), Loader=yaml.SafeLoader
                     )
 
+                    ref = path.splitext(yaml_fname)[0]
+
                     docid = ref_data.get("docid", None)
                     ref_type = ref_data.get("doctype", None)
 
@@ -100,6 +102,7 @@ def _do_indexation(dataset_name, data_dir):
                     if ref_id:
                         exists_ids.append(ref_id)
                         ref_obj, created = RefData.objects.update_or_create(
+                            ref=ref,
                             ref_id=ref_id,
                             ref_type=ref_type,
                             dataset=dataset_name,
