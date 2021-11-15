@@ -113,7 +113,7 @@ def _do_indexation(dataset_name, data_dir):
 
                         RD.hset(dataset_name, "indexed_files", i)
                     else:
-                        # TODO:
+                        # TODO #17:
                         # write error to log?
                         pass
 
