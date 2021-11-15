@@ -83,7 +83,7 @@ def _do_indexation(dataset_name, data_dir):
         lst = glob.glob("%s/*.yaml" % data_dir)
 
         i = 0
-        exists_ids = []
+        indexed_ids = []
         for yaml_fname in lst:
             with open(yaml_fname, "r", encoding="utf-8") as fhandler:
                 try:
@@ -100,7 +100,7 @@ def _do_indexation(dataset_name, data_dir):
                         ref_id = docid.get("id", None)
 
                     if ref_id:
-                        exists_ids.append(ref_id)
+                        indexed_ids.append(ref_id)
                         ref_obj, created = RefData.objects.update_or_create(
                             ref=ref,
                             ref_id=ref_id,
@@ -124,7 +124,7 @@ def _do_indexation(dataset_name, data_dir):
 
         # Remove all objects of this dataset (except indexed now)
         RefData.objects.filter(dataset=dataset_name).exclude(
-            ref_id__in=exists_ids
+            ref_id__in=indexed_ids
         ).delete()
 
 
