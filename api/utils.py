@@ -9,7 +9,7 @@ from git.exc import InvalidGitRepositoryError, GitCommandError
 
 from django.conf import settings
 
-from celery.task.control import revoke
+from indexer.celery import app
 
 from .models import RefData
 from . import RD
@@ -255,7 +255,7 @@ def stop_indexation(dataset_name):
     RD.hset(dataset_name, "commit", "")
 
     if task_id:
-        revoke(task_id, terminate=True)
+        app.control.revoke(task_id, terminate=True)
 
     return task_id
 
