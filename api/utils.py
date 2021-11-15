@@ -99,7 +99,7 @@ def _do_indexation(dataset_name, data_dir):
 
                     if ref_id:
                         exists_ids.append(ref_id)
-                        ref_obj = RefData.objects.update_or_create(
+                        ref_obj, created = RefData.objects.update_or_create(
                             ref_id=ref_id,
                             ref_type=ref_type,
                             dataset=dataset_name,
