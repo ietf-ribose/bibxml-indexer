@@ -1,17 +1,80 @@
-import glob
-import time
+import traceback
 from os import path
-
-import yaml
-
-from celery import shared_task
-from django.conf import settings
 
 from indexer.celery import app
 
-from .utils import start_indexation
+from .repo import ensure_latest
+from .datasets import locate_bibxml_source_repo, locate_relaton_source_repo
+from .utils import get_work_dir_path, index_dataset
 
 
-@shared_task
-def run_indexer(dataset_name):
-    start_indexation(dataset_name)
+@app.task(bind=True)
+def run_indexer(task, dataset_id, refs=None):
+    """(Re)indexes given dataset.
+
+    :param refs: a list of refs to index,
+                 if not provided the entire dataset is indexed
+
+    :returns: an object of the shape
+              { total: int,
+                indexed: int,
+                refs: comma-separated string of requested refs }
+    """
+
+    try:
+        bibxml_repo_url, bibxml_repo_branch = \
+            locate_bibxml_source_repo(dataset_id)
+        bibxml_work_dir_path = get_work_dir_path(
+            dataset_id,
+            bibxml_repo_url,
+            bibxml_repo_branch)
+        ensure_latest(
+            bibxml_repo_url,
+            bibxml_repo_branch,
+            bibxml_work_dir_path)
+        bibxml_data_dir = path.join(bibxml_work_dir_path, 'data')
+
+        # TODO: Use relaton-bib-py to generate Relaton data
+        relaton_repo_url, relaton_repo_branch = \
+            locate_relaton_source_repo(dataset_id)
+        relaton_work_dir_path = get_work_dir_path(
+            dataset_id,
+            relaton_repo_url,
+            relaton_repo_branch)
+        ensure_latest(
+            relaton_repo_url,
+            relaton_repo_branch,
+            relaton_work_dir_path)
+        relaton_data_dir = path.join(relaton_work_dir_path, 'data')
+
+        update_status = (lambda total, indexed: task.update_state(
+                state='PROGRESS',
+                meta={
+                    'total': total,
+                    'indexed': indexed,
+                    'requested_refs': ','.join(refs or []),
+                },
+            )
+        )
+
+        total, indexed = index_dataset(
+            dataset_id,
+            bibxml_data_dir,
+            relaton_data_dir,
+            refs,
+            update_status)
+
+        return {
+            'total': total,
+            'indexed': indexed,
+            'requested_refs': ','.join(refs or []),
+        }
+
+    except SystemExit:
+        traceback.print_exc()
+        print("Indexing {}: Task aborted with SystemExit".format(dataset_id))
+
+    except:  # noqa: E722
+        traceback.print_exc()
+        print("Indexing {}: Task failed to complete".format(dataset_id))
+        raise

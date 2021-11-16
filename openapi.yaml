@@ -1,14 +1,16 @@
 openapi: 3.0.1
 
 info:
-  title: BibXML datasets indexer
-  description: This is BibXML indexer API
+  title: BibXML indexer
+  description: |
+    BibXML indexer API.
+    NOTE: Not all 500 responses are currently provided in the shape of JSON.
   contact:
     email: open.source@ribose.com
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  version: 0.0.2
+  version: v1
 
 servers:
 - url: /api/v1
@@ -16,62 +18,35 @@ servers:
 paths:
   /indexer/{dataset}/run:
     get:
-      summary: Run Indexer task for a dataset
+      summary: Queues dataset indexing
       description: Creates Celery task that runs indexer for chosen datasets if it
         possible
       operationId: runIndexer
       parameters:
       - name: dataset
         in: path
-        description: Name of dataset to index
+        description: Dataset ID
         required: true
         schema:
           $ref: '#/components/schemas/IndexableDatasets'
+      - name: refs
+        in: query
+        description: Comma-separated list of refs to index (if not provided, the entire dataset is reindexed)
+        schema:
+          type: array
+          items:
+            type: string
+        style: form
+        explode: false
       responses:
         200:
-          description: successful operation
+          description: Indexing task had been queued (does not mean indexing completed without errors)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessMessage'
-        404:
-          description: Unknown dataset to index
-          content: {}
-
         500:
-          description: operation failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessage'
-
-  /indexer/{dataset}/stop:
-    get:
-      summary: Stop Indexer task for a dataset if it possible
-      description: Stops celery indexer task for chosen dataset if it running
-      operationId: stopIndexer
-      parameters:
-      - name: dataset
-        in: path
-        description: Name of indexing dataset
-        required: true
-        schema:
-          $ref: '#/components/schemas/IndexableDatasets'
-
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessMessage'
-
-        404:
-          description: Unknown dataset to index
-          content: {}
-
-        500:
-          description: operation failed
+          description: Queueing failed
           content:
             application/json:
               schema:
@@ -79,14 +54,13 @@ paths:
 
   /indexer/{dataset}/reset:
     get:
-      summary: Reset Indexer task for a dataset and delete all records at DB
-      description: Stops celery indexer task for chosen dataset if it running 
-        and delete all indexed records at database
-      operationId: resetIndexer
+      summary: Clear dataset index
+      description: Clears indexed data for given dataset; notably, does not abort any indexing tasks queued or progressing
+      operationId: resetIndex
       parameters:
       - name: dataset
         in: path
-        description: Name of indexing dataset
+        description: Dataset ID
         required: true
         schema:
           $ref: '#/components/schemas/IndexableDatasets'
@@ -97,11 +71,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessMessage'
-
-        404:
-          description: Unknown dataset to index
-          content: {}
-
         500:
           description: operation failed
           content:
@@ -109,17 +78,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorMessage'
 
-
-
   /indexer/{dataset}/status:
     get:
-      summary: Shows Indexer task status for selected dataset
-      description: Shows celery indexer task status
+      summary: Shows latest indexing task status
+      description: Returns a list of indexing tasks for given dataset, starting from most recently started task
       operationId: indexerStatus
       parameters:
       - name: dataset
         in: path
-        description: Name of indexing dataset
+        description: Dataset ID
         required: true
         schema:
           $ref: '#/components/schemas/IndexableDatasets'
@@ -130,12 +97,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IndexerStatus'
-        404:
-          description: Unknown dataset to index
-          content: {}
+
+  /tasks/{task_id}/stop:
+    get:
+      summary: Attempts to stop specified task 
+      description: Revokes given task, and attempts to terminate if running. Is not guaranteed to take effect immediately
+      operationId: stopTask
+      parameters:
+      - name: task_id
+        in: path
+        description: Task ID, can be obtained by checking dataset index status
+        required: true
+        schema:
+          $ref: '#/components/schemas/IndexableDatasets'
+
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        500:
+          description: operation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+
+  /tasks/stop-all:
+    get:
+      summary: Cancel any pending tasks
+      description: Revokes any pending tasks. Notably, is not guaranteed to terminate the already running ones
+      operationId: stopAllTasks
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        500:
+          description: operation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
 
 components:
-
   schemas:
 
     IndexableDatasets:
@@ -154,12 +163,9 @@ components:
     SuccessMessage:
       type: object
       properties:
-        error:
-          type: object
-          properties:
-            message:
-              type: string
-              description: Human readable success message
+        message:
+          type: string
+          description: Human-readable success message
 
     ErrorMessage:
       type: object
@@ -172,37 +178,56 @@ components:
               description: Code for automatic error processing
             message:
               type: string
-              description: Human readable error message
-
+              description: Human-readable error message
 
     IndexerStatus:
       type: object
       properties:
-        task_id:
-          type: string
-          format: uuid
-          description: Celery task ID
-        indexed_files:
-          type: integer
-          description: Counter of processed YAML files
-        started_at:
-          type: string
-          format: datetime
-          description: Task start timestamp
-        stopped_at:
-          type: string
-          format: datetime
-          description: Task stop timestamp
-        message:
-          type: string
-          description: Human readable results of this run
-        commit:
-          type: string
-          description: Hex of HEAD commit of indexing dataset
-        status:
-          type: string
-          description: Indexer Status
-          enum:
-          - running
-          - completed
-          - failed
+        tasks:
+          description: A list of most recent indexing tasks for given dataset
+          type: array
+          items:
+            type: object
+            description: Describes a task. Currently, only task ID is reliably provided
+            required:
+              - task_id
+            properties:
+              task_id:
+                format: string
+                description: Task ID; can be used to cancel this task using the tasks endpoint
+              started_at:
+                type: string
+                format: datetime
+              completed_at:
+                type: string
+                format: datetime
+              status:
+                type: string
+                description: Short status keyword
+              outcome_summary:
+                type: string
+                description: Human-readable description of successful or unsuccesful outcome, if achieved
+              error:
+                type: object
+                description: Error information for failed task, if available
+                properties:
+                  type:
+                    type: string
+                  message:
+                    type: string
+              requested_refs:
+                type: array
+                description: Refs that were requested for indexing.
+                items:
+                  type: string
+              progress:
+                type: object
+                required:
+                  - indexed
+                properties:
+                  total:
+                    description: Total number of source files found
+                    type: integer
+                  indexed:
+                    description: Total number of indexed files
+                    type: integer

@@ -134,17 +134,33 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CELERY_BROKER_URL = environ.get('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = environ.get('CELERY_RESULT_BACKEND')
+CELERY_SEND_TASK_SENT_EVENT = True
+# TODO: Figure out correct identifier scope for the TRACK_STARTED Celery setting
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TRACK_STARTED = True
+CELERY_WORKER_CONCURRENCY = 1
+CELERY_TASK_RESULT_EXPIRES = 604800
 
 REDIS_HOST = environ.get('REDIS_HOST', 'redis')
 REDIS_PORT = environ.get('REDIS_PORT', 6379)
 
 PATH_TO_DATA_DIR = environ.get('PATH_TO_DATA_DIR')
+"""Deprecated."""
 
-RELATON_DATASETS = {
+DATASET_TMP_ROOT = environ.get('PATH_TO_DATA_DIR', "{0}/datasets".format(BASE_DIR))
+"""Where to keep fetched source data and data generated during indexing."""
+
+# TODO: Update DATASET_SOURCE_OVERRIDES setting according to currently available Github repos and their branch names
+DATASET_SOURCE_OVERRIDES = {
     "ecma": {
-            "git_remote_url": "git://github.com/relaton/relaton-data-ecma.git",
-            "git_branch": "master",
-            "local_repo_dir": "relaton-data-ecma"
+            "bibxml_data": {
+                "git_remote_url": "git://github.com/ietf-ribose/bibxml-data-ecma.git",
+                "git_branch": "main",
+            },
+            "relaton_data": {
+                "git_remote_url": "git://github.com/relaton/relaton-data-ecma.git",
+                "git_branch": "master",
+            },
         },
     "nist": {
             "git_remote_url": "git://github.com/relaton/relaton-data-nist.git",
