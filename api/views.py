@@ -13,8 +13,11 @@ def index(request):
     return HttpResponse("API v1 index")
 
 
-def api_run_indexer(request, dataset_name, refs):
+def api_run_indexer(request, dataset_name):
     # TODO: Quickly check sources for given dataset before queueing indexing
+
+    refs_raw = request.GET.get('refs', None)
+    refs = refs_raw.split(',') if refs_raw else None
 
     result = run_indexer.delay(dataset_name, refs)
     task_id = result.id
