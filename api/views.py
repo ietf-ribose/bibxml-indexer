@@ -14,6 +14,8 @@ def index(request):
 
 
 def api_run_indexer(request, dataset_name):
+    """Starts indexing for dataset."""
+
     # TODO: Quickly check sources for given dataset before queueing indexing
 
     refs_raw = request.GET.get('refs', None)
@@ -33,6 +35,8 @@ def api_run_indexer(request, dataset_name):
 
 
 def api_reset_indexer(request, dataset_name):
+    """Clears index for dataset."""
+
     reset_index_for_dataset(dataset_name)
 
     return JsonResponse({
@@ -41,6 +45,8 @@ def api_reset_indexer(request, dataset_name):
 
 
 def api_indexer_status(request, dataset_name):
+    """Retrieves information about latest indexing tasks for dataset."""
+
     task_ids = get_task_ids(dataset_name)
     tasks = []
 
