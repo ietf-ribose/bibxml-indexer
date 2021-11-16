@@ -2,6 +2,9 @@ import traceback
 from os import path
 
 from indexer.celery import app
+from celery.utils.log import get_task_logger
+
+logger = get_task_logger(__name__)
 
 from .repo import ensure_latest
 from .datasets import locate_bibxml_source_repo, locate_relaton_source_repo
@@ -118,10 +121,16 @@ def run_indexer(task, dataset_id, refs=None):
         }
 
     except SystemExit:
+        logger.exception(
+            "Failed to index dataset %s: Task aborted with SystemExit",
+            dataset_id)
         traceback.print_exc()
         print("Indexing {}: Task aborted with SystemExit".format(dataset_id))
 
     except:  # noqa: E722
+        logger.exception(
+            "Failed to index dataset %s: Task failed",
+            dataset_id)
         traceback.print_exc()
         print("Indexing {}: Task failed to complete".format(dataset_id))
         raise
