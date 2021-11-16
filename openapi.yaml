@@ -149,16 +149,22 @@ components:
 
     IndexableDatasets:
       type: string
+      # TODO: Auto-generate this list at deployment time?
       enum:
-      - ecma
+      - rfcs
+      - ids
+      - rfcsubseries
+      - misc
+      - w3c
+      - 3gpp
+      - ieee
+      - iana
+      - doi
       - nist
-      - ietf
-      - itu-r
-      - calconnect
-      - cie
-      - iso
-      - bipm
-      - iho
+      description: |
+        For up-to-date list of available datasets,
+        see bibxml-data-* repositories under ietf-ribose GitHub organization.
+        See also bibxml-indexer service README.
 
     SuccessMessage:
       type: object

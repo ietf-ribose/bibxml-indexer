@@ -17,6 +17,24 @@ With properly configured infrastructure across bibxml-service and bibxml-indexer
 given dataset will be indexed into a database accessible by bibxml-service APIs.
 
 
+Datasets
+--------
+
+These are the currently available datasets:
+
+* ``rfcs`` (bibxml)
+* ``ids`` (bibxml3)
+* ``rfcsubseries`` (bibxml9)
+* ``misc`` (bibxml2)
+* ``w3c`` (bibxml4)
+* ``3gpp`` (bibxml5)
+* ``ieee`` (bibxml6)
+* ``iana`` (bibxml8)
+* ``doi`` (bibxml9)
+* ``nist`` (no existing id)
+
+
+
 Dataset sources
 ---------------
 
