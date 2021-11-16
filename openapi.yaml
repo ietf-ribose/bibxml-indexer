@@ -18,27 +18,35 @@ servers:
 
 paths:
   /indexer/{dataset}/run:
-    get:
-      summary: Queues dataset indexing
-      description: Creates Celery task that runs indexer for chosen datasets if it
-        possible
-      operationId: runIndexer
-      parameters:
-      - name: dataset
-        in: path
-        description: Dataset ID
-        required: true
-        schema:
-          $ref: '#/components/schemas/IndexableDatasets'
-      - name: refs
-        in: query
-        description: Comma-separated list of refs to index (if not provided, the entire dataset is reindexed)
-        schema:
-          type: array
-          items:
-            type: string
-        style: form
-        explode: false
+    parameters:
+    - name: dataset
+      in: path
+      description: Dataset ID
+      required: true
+      schema:
+        $ref: '#/components/schemas/IndexableDatasets'
+    post:
+      summary: (Re)index dataset
+      description: Reindexes the entire dataset or only specified refs.
+      operationId: indexDataset
+      consumes:
+      - application/x-www-form-urlencoded
+      requestBody:
+        description: Indexation options.
+        content:
+          'application/x-www-form-urlencoded':
+            schema:
+              type: object
+              properties:
+                refs:
+                  description: Comma-separated list of refs to index (if not provided, the entire dataset is reindexed)
+                  type: array
+                  items:
+                    type: string
+            encoding:
+              refs:
+                style: form
+                explode: false
       responses:
         200:
           description: Indexing task had been queued (does not mean indexing completed without errors)
@@ -54,17 +62,17 @@ paths:
                 $ref: '#/components/schemas/ErrorMessage'
 
   /indexer/{dataset}/reset:
-    get:
+    parameters:
+    - name: dataset
+      in: path
+      description: Dataset ID
+      required: true
+      schema:
+        $ref: '#/components/schemas/IndexableDatasets'
+    post:
       summary: Clear dataset index
-      description: Clears indexed data for given dataset; notably, does not abort any indexing tasks queued or progressing
-      operationId: resetIndex
-      parameters:
-      - name: dataset
-        in: path
-        description: Dataset ID
-        required: true
-        schema:
-          $ref: '#/components/schemas/IndexableDatasets'
+      description: Clears indexed data for given dataset; notably, does not abort any indexing tasks queued or progressing.
+      operationId: resetDatasetIndex
       responses:
         200:
           description: successful operation
@@ -80,17 +88,17 @@ paths:
                 $ref: '#/components/schemas/ErrorMessage'
 
   /indexer/{dataset}/status:
+    parameters:
+    - name: dataset
+      in: path
+      description: Dataset ID
+      required: true
+      schema:
+        $ref: '#/components/schemas/IndexableDatasets'
     get:
-      summary: Shows latest indexing task status
-      description: Returns a list of indexing tasks for given dataset, starting from most recently started task
-      operationId: indexerStatus
-      parameters:
-      - name: dataset
-        in: path
-        description: Dataset ID
-        required: true
-        schema:
-          $ref: '#/components/schemas/IndexableDatasets'
+      summary: View indexing tasks for dataset
+      description: Returns a list of recent indexing tasks for given dataset, starting from most recently started task.
+      operationId: getDatasetTaskStatus
       responses:
         200:
           description: successful operation, shows index current status
@@ -100,17 +108,17 @@ paths:
                 $ref: '#/components/schemas/IndexerStatus'
 
   /tasks/{task_id}/stop:
-    get:
-      summary: Attempts to stop specified task 
-      description: Revokes given task, and attempts to terminate if running. Is not guaranteed to take effect immediately
+    parameters:
+    - name: task_id
+      in: path
+      description: Task ID, can be obtained by checking dataset index status
+      required: true
+      schema:
+        $ref: '#/components/schemas/IndexableDatasets'
+    post:
+      summary: Stop task 
+      description: Revokes given task, and attempts to terminate if running. Is not guaranteed to take effect immediately.
       operationId: stopTask
-      parameters:
-      - name: task_id
-        in: path
-        description: Task ID, can be obtained by checking dataset index status
-        required: true
-        schema:
-          $ref: '#/components/schemas/IndexableDatasets'
 
       responses:
         200:
@@ -127,9 +135,9 @@ paths:
                 $ref: '#/components/schemas/ErrorMessage'
 
   /tasks/stop-all:
-    get:
-      summary: Cancel any pending tasks
-      description: Revokes any pending tasks. Notably, is not guaranteed to terminate the already running ones
+    post:
+      summary: Revoke all tasks
+      description: Revokes any pending tasks. Notably, is not guaranteed to terminate the already running ones.
       operationId: stopAllTasks
       responses:
         200:

@@ -1,4 +1,5 @@
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_POST, require_GET
 
 from celery.result import AsyncResult
 
@@ -9,6 +10,7 @@ from .index import reset_index_for_dataset
 from .tasks import run_indexer
 
 
+@require_GET
 def index(request):
     """Serves API index."""
 
@@ -40,12 +42,13 @@ def index(request):
     """)
 
 
+@require_POST
 def api_run_indexer(request, dataset_name):
-    """Starts indexing for dataset."""
+    """Starts indexing for given dataset."""
 
     # TODO: Quickly check sources for given dataset before queueing indexing
 
-    refs_raw = request.GET.get('refs', None)
+    refs_raw = request.POST.get('refs', None)
     refs = refs_raw.split(',') if refs_raw else None
 
     result = run_indexer.delay(dataset_name, refs)
@@ -61,6 +64,7 @@ def api_run_indexer(request, dataset_name):
     })
 
 
+@require_POST
 def api_reset_index(request, dataset_name):
     """Clears index for dataset."""
 
@@ -71,6 +75,7 @@ def api_reset_index(request, dataset_name):
     })
 
 
+@require_GET
 def api_indexer_status(request, dataset_name):
     """Retrieves information about latest indexing tasks for dataset."""
 
@@ -123,6 +128,7 @@ def api_indexer_status(request, dataset_name):
     })
 
 
+@require_POST
 def api_stop_task(request, task_id):
     """Revokes and attempts to terminate a task given its ID."""
 
@@ -134,6 +140,7 @@ def api_stop_task(request, task_id):
     })
 
 
+@require_POST
 def api_stop_all_tasks(request):
     """Revokes any pending tasks, does not guarantee termination."""
 
