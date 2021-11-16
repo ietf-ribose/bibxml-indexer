@@ -3,7 +3,7 @@ openapi: 3.0.1
 info:
   title: BibXML indexer
   description: |
-    BibXML indexer API.
+    BibXML indexer API. Can be used to trigger dataset index, and check status.
     NOTE: Not all 500 responses are currently provided in the shape of JSON.
   contact:
     email: open.source@ribose.com
