@@ -10,7 +10,34 @@ from .tasks import run_indexer
 
 
 def index(request):
-    return HttpResponse("API v1 index")
+    """Serves API index."""
+
+    return HttpResponse("""
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>API documentation</title>
+
+            <meta charset="utf-8"/>
+            <meta name="viewport"
+                content="width=device-width,
+                initial-scale=1">
+
+            <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+
+            <style>
+              body {
+                margin: 0;
+                padding: 0;
+              }
+            </style>
+          </head>
+          <body>
+            <redoc spec-url='/openapi.yaml'></redoc>
+            <script src="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js"></script>
+          </body>
+        </html>
+    """)
 
 
 def api_run_indexer(request, dataset_name):
