@@ -21,6 +21,14 @@ def run_indexer(task, dataset_id, refs=None):
                 refs: comma-separated string of requested refs }
     """
 
+    task.update_state(
+        state='PROGRESS',
+        meta={
+            'action': 'starting indexing {}'.format(dataset_id),
+            'requested_refs': ','.join(refs or []),
+        },
+    )
+
     try:
         bibxml_repo_url, bibxml_repo_branch = \
             locate_bibxml_source_repo(dataset_id)
@@ -28,28 +36,67 @@ def run_indexer(task, dataset_id, refs=None):
             dataset_id,
             bibxml_repo_url,
             bibxml_repo_branch)
+
+        task.update_state(
+            state='PROGRESS',
+            meta={
+                'action':
+                    'pulling or cloning BibXML source '
+                    'from {} (branch {}) into {}'
+                    .format(
+                        bibxml_repo_url,
+                        bibxml_repo_branch,
+                        bibxml_work_dir_path),
+                'requested_refs': ','.join(refs or []),
+            },
+        )
+
         ensure_latest(
             bibxml_repo_url,
             bibxml_repo_branch,
             bibxml_work_dir_path)
+
         bibxml_data_dir = path.join(bibxml_work_dir_path, 'data')
 
         # TODO: Use relaton-bib-py to generate Relaton data
+
         relaton_repo_url, relaton_repo_branch = \
             locate_relaton_source_repo(dataset_id)
         relaton_work_dir_path = get_work_dir_path(
             dataset_id,
             relaton_repo_url,
             relaton_repo_branch)
+
+        task.update_state(
+            state='PROGRESS',
+            meta={
+                'action':
+                    'pulling or cloning Relaton source '
+                    'from {} (branch {}) into {}'
+                    .format(
+                        relaton_repo_url,
+                        relaton_repo_branch,
+                        relaton_work_dir_path),
+                'requested_refs': ','.join(refs or []),
+            },
+        )
+
         ensure_latest(
             relaton_repo_url,
             relaton_repo_branch,
             relaton_work_dir_path)
+
         relaton_data_dir = path.join(relaton_work_dir_path, 'data')
 
         update_status = (lambda total, indexed: task.update_state(
                 state='PROGRESS',
                 meta={
+                    'action':
+                        'indexing using BibXML data in {} '
+                        'and Relaton data in {}'
+                        .format(
+                            bibxml_data_dir,
+                            relaton_data_dir),
                     'total': total,
                     'indexed': indexed,
                     'requested_refs': ','.join(refs or []),
