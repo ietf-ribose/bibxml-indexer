@@ -61,7 +61,7 @@ def api_run_indexer(request, dataset_name):
     })
 
 
-def api_reset_indexer(request, dataset_name):
+def api_reset_index(request, dataset_name):
     """Clears index for dataset."""
 
     reset_index_for_dataset(dataset_name)
