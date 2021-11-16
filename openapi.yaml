@@ -169,6 +169,7 @@ components:
 
     SuccessMessage:
       type: object
+      description: Success response
       properties:
         message:
           type: string
@@ -176,6 +177,7 @@ components:
 
     ErrorMessage:
       type: object
+      description: Error response
       properties:
         error:
           type: object
@@ -189,6 +191,7 @@ components:
 
     IndexerStatus:
       type: object
+      description: Recent dataset indexing task history
       properties:
         tasks:
           description: A list of most recent indexing tasks for given dataset
