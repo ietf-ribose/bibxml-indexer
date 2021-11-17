@@ -8,8 +8,6 @@ services:
     image: postgres
     volumes:
       - ./data/db:/var/lib/postgresql/data
-    env_file:
-      - ./.env.dev
     hostname: db
 
   web:
