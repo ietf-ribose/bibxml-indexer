@@ -30,7 +30,7 @@ def ensure_latest(repo_url, branch, work_dir):
         if all(['origin' in repo.remotes,
                 repo.remotes.origin.url == repo_url,
                 repo.active_branch.name == branch]):
-            repo.remotes.origin.pull()
+            repo.remotes.origin.pull(no_rebase=True)
 
         else:
             repo = reclone(repo_url, branch, work_dir)
