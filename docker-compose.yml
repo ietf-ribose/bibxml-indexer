@@ -26,6 +26,16 @@ services:
     depends_on:
       - db
 
+  flower:
+    image: mher/flower
+    hostname: flower
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - celery
+    ports:
+      - "5555:5555"
+
   celery:
     restart: always
     build:
