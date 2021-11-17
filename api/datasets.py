@@ -13,18 +13,18 @@ def locate_bibxml_source_repo(dataset_id):
                  get(dataset_id, {}).
                  get('bibxml_data', {}))
     return (
-      overrides.get(
-        'repo_url',
-        GITHUB_REPO_URL.format(
-          user='ietf-ribose',
-          repo='bibxml-data-%s' % dataset_id)),
-      overrides.get('repo_branch', 'main'),
+        overrides.get(
+            'repo_url',
+            GITHUB_REPO_URL.format(
+                user='ietf-ribose',
+                repo='bibxml-data-%s' % dataset_id)),
+        overrides.get('repo_branch', 'main'),
     )
 
 
 def locate_relaton_source_repo(dataset_id):
     """
-    .. note:: Deprecated when ``relaton-bib-py`` is used to generate Relaton data instead.
+    .. note:: Deprecated when ``relaton-bib-py`` generates Relaton data.
 
     :param dataset_id: dataset ID as string
     :returns: tuple (repo_url, repo_branch)
@@ -34,10 +34,10 @@ def locate_relaton_source_repo(dataset_id):
                  get('relaton_data', {}))
 
     return (
-      overrides.get(
-        'repo_url',
-        GITHUB_REPO_URL.format(
-          user='relaton',
-          repo='relaton-data-%s' % dataset_id)),
-      overrides.get('repo_branch', 'master'),
+        overrides.get(
+            'repo_url',
+            GITHUB_REPO_URL.format(
+                user='relaton',
+                repo='relaton-data-%s' % dataset_id)),
+        overrides.get('repo_branch', 'main'),
     )
