@@ -1,3 +1,4 @@
+import traceback
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 
@@ -84,42 +85,48 @@ def api_indexer_status(request, dataset_name):
 
     for tid in task_ids:
         result = AsyncResult(tid, app=app)
+        task = dict(task_id=tid, status=result.status)
+
         meta = result.info or {}
 
-        task = dict(
-            task_id=tid,
-            status=meta.get('status', 'N/A'),
-            requested_refs=meta.get('requested_refs', 'N/A'))
-
-        total, indexed = \
-            meta.get('total', None), meta.get('indexed', None)
-
-        if result.successful():
-            task['outcome_summary'] = \
-                "Succeeded (total: {}, indexed: {})".format(
-                    total if total is not None else 'N/A',
-                    indexed if indexed is not None else 'N/A')
-            if result.date_done:
-                task['completed_at'] = \
-                    result.date_done.strftime('%Y-%m-%dT%H:%M:%SZ')
-
-        elif result.failed():
-            err_msg = meta.get('exc_message', ['N/A'])
+        if isinstance(meta, Exception):
             task['error'] = dict(
-                type=meta.get('exc_type', 'N/A'),
-                message='\n'.join(err_msg)
-                        if isinstance(err_msg, list)
-                        else repr(err_msg),
+                type=repr(meta),
+                message='\n'.join(traceback.format_tb(meta.__traceback__)),
             )
 
         else:
-            task['action'] = meta.get('action', 'N/A')
-            progress = {}
-            if indexed is not None:
-                progress['indexed'] = indexed
-            if total is not None:
-                progress['total'] = total
-            task['progress'] = progress
+            task['requested_refs'] = meta.get('requested_refs', 'N/A')
+
+            total, indexed = \
+                meta.get('total', None), meta.get('indexed', None)
+
+            if result.successful():
+                task['outcome_summary'] = \
+                    "Succeeded (total: {}, indexed: {})".format(
+                        total if total is not None else 'N/A',
+                        indexed if indexed is not None else 'N/A')
+                if result.date_done:
+                    task['completed_at'] = \
+                        result.date_done.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+            elif result.failed():
+                err_msg = meta.get('exc_message', ['N/A'])
+                task['error'] = dict(
+                    type=meta.get('exc_type', 'N/A'),
+                    message='\n'.join(err_msg)
+                            if isinstance(err_msg, list)
+                            else repr(err_msg),
+                )
+
+            else:
+                task['action'] = meta.get('action', 'N/A')
+                progress = {}
+                if indexed is not None:
+                    progress['indexed'] = indexed
+                if total is not None:
+                    progress['total'] = total
+                task['progress'] = progress
 
         tasks.append(task)
 
