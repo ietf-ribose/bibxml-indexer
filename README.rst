@@ -42,6 +42,7 @@ Invoking Django management commands
 
     % docker compose exec web bash
 
+After which you are in a shell where you can invoke any ``python manage.py <command>``.
 
 Using the API
 -------------
