@@ -21,14 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = environ.get("DJANGO_SECRET")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(environ.get("DJANGO_DEBUG", default=0))
+DEBUG = int(environ.get("DEBUG", default=0)) == 1
 
-# 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
-# For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
-ALLOWED_HOSTS = environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = [
+    environ.get("PRIMARY_HOSTNAME"),
+]
 
 
 # Application definition
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -80,11 +81,11 @@ WSGI_APPLICATION = 'indexer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': environ.get('DJANGO_DATABASE'),
-        'USER': environ.get('DJANGO_DATABASE_USER'),
-        'PASSWORD': environ.get('DJANGO_DATABASE_PASSWORD'),
-        'HOST': environ.get('DJANGO_DATABASE_HOST'),
-        'PORT': int(environ.get("DJANGO_DATABASE_PORT", default=5432)),
+        'NAME': environ.get('DB_NAME'),
+        'USER': environ.get('DB_USER'),
+        'PASSWORD': environ.get('DB_SECRET'),
+        'HOST': environ.get('DB_HOST'),
+        'PORT': int(environ.get('DB_PORT')),
     }
 }
 
@@ -127,6 +128,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static'
+]
+
+STATIC_ROOT = BASE_DIR / 'build' / 'static'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
@@ -134,72 +143,75 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CELERY_BROKER_URL = environ.get('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = environ.get('CELERY_RESULT_BACKEND')
+
 CELERY_SEND_TASK_SENT_EVENT = True
+
 # TODO: Figure out correct identifier scope for the TRACK_STARTED Celery setting
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TRACK_STARTED = True
+
 CELERY_WORKER_CONCURRENCY = 1
 CELERY_TASK_RESULT_EXPIRES = 604800
 
-REDIS_HOST = environ.get('REDIS_HOST', 'redis')
-REDIS_PORT = environ.get('REDIS_PORT', 6379)
+REDIS_HOST = environ.get('REDIS_HOST')
+REDIS_PORT = environ.get('REDIS_PORT')
 
 PATH_TO_DATA_DIR = environ.get('PATH_TO_DATA_DIR')
 """Deprecated."""
 
-DATASET_TMP_ROOT = environ.get('PATH_TO_DATA_DIR', "{0}/datasets".format(BASE_DIR))
+DATASET_TMP_ROOT = environ.get('DATASET_TMP_ROOT')
 """Where to keep fetched source data and data generated during indexing."""
 
 # TODO: Update DATASET_SOURCE_OVERRIDES setting according to currently available Github repos and their branch names
 DATASET_SOURCE_OVERRIDES = {
-    "ecma": {
-            "bibxml_data": {
-                "git_remote_url": "git://github.com/ietf-ribose/bibxml-data-ecma.git",
-                "git_branch": "main",
-            },
-            "relaton_data": {
-                "git_remote_url": "git://github.com/relaton/relaton-data-ecma.git",
-                "git_branch": "master",
-            },
-        },
-    "nist": {
-            "git_remote_url": "git://github.com/relaton/relaton-data-nist.git",
-            "git_branch": "main",
-            "local_repo_dir": "relaton-data-nist"
-        },
-    "ietf": {
-            "git_remote_url": "git://github.com/relaton/relaton-data-ietf.git",
-            "git_branch": "main",
-            "local_repo_dir": "relaton-data-ietf"
-        },
-    "itu-r": {
-            "git_remote_url": "git://github.com/relaton/relaton-data-itu-r.git",
-            "git_branch": "master",
-            "local_repo_dir": "relaton-data-itu-r"
-        },
-    "calconnect": {
-            "git_remote_url": "git://github.com/relaton/relaton-data-calconnect.git",
-            "git_branch": "main",
-            "local_repo_dir": "relaton-data-calconnect"
-        },
-    "cie": {
-            "git_remote_url": "git://github.com/relaton/relaton-data-cie.git",
-            "git_branch": "master",
-            "local_repo_dir": "relaton-data-cie"
-        },
-    "iso": {
-            "git_remote_url": "git://github.com/relaton/relaton-data-iso.git",
-            "git_branch": "main",
-            "local_repo_dir": "relaton-data-iso"
-        },
-    "bipm": {
-            "git_remote_url": "git://github.com/relaton/relaton-data-bipm.git",
-            "git_branch": "master",
-            "local_repo_dir": "relaton-data-bipm"
-        },
-    "iho": {
-            "git_remote_url": "git://github.com/relaton/relaton-data-iho.git",
-            "git_branch": "master",
-            "local_repo_dir": "relaton-data-iho"
-        },
+    # "ecma": {
+    #         "bibxml_data": {
+    #             "git_remote_url": "git://github.com/ietf-ribose/bibxml-data-ecma.git",
+    #             "git_branch": "main",
+    #         },
+    #         "relaton_data": {
+    #             "git_remote_url": "git://github.com/relaton/relaton-data-ecma.git",
+    #             "git_branch": "master",
+    #         },
+    #     },
+    # "nist": {
+    #         "git_remote_url": "git://github.com/relaton/relaton-data-nist.git",
+    #         "git_branch": "main",
+    #         "local_repo_dir": "relaton-data-nist"
+    #     },
+    # "ietf": {
+    #         "git_remote_url": "git://github.com/relaton/relaton-data-ietf.git",
+    #         "git_branch": "main",
+    #         "local_repo_dir": "relaton-data-ietf"
+    #     },
+    # "itu-r": {
+    #         "git_remote_url": "git://github.com/relaton/relaton-data-itu-r.git",
+    #         "git_branch": "master",
+    #         "local_repo_dir": "relaton-data-itu-r"
+    #     },
+    # "calconnect": {
+    #         "git_remote_url": "git://github.com/relaton/relaton-data-calconnect.git",
+    #         "git_branch": "main",
+    #         "local_repo_dir": "relaton-data-calconnect"
+    #     },
+    # "cie": {
+    #         "git_remote_url": "git://github.com/relaton/relaton-data-cie.git",
+    #         "git_branch": "master",
+    #         "local_repo_dir": "relaton-data-cie"
+    #     },
+    # "iso": {
+    #         "git_remote_url": "git://github.com/relaton/relaton-data-iso.git",
+    #         "git_branch": "main",
+    #         "local_repo_dir": "relaton-data-iso"
+    #     },
+    # "bipm": {
+    #         "git_remote_url": "git://github.com/relaton/relaton-data-bipm.git",
+    #         "git_branch": "master",
+    #         "local_repo_dir": "relaton-data-bipm"
+    #     },
+    # "iho": {
+    #         "git_remote_url": "git://github.com/relaton/relaton-data-iho.git",
+    #         "git_branch": "master",
+    #         "local_repo_dir": "relaton-data-iho"
+    #     },
 }

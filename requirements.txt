@@ -1,3 +1,4 @@
+daphne>=3.0,<4.0
 django>=3.0,<4.0
 psycopg2
 celery>=4.0,<5.0
@@ -5,3 +6,4 @@ redis>=3.0,<4.0
 pyyaml>=5.4
 gitpython>=3.1,<4.0
 flake8
+whitenoise>=5.3.0,<6.0
