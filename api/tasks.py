@@ -1,8 +1,9 @@
 import traceback
 from os import path
 
-from indexer.celery import app
 from celery.utils.log import get_task_logger
+
+from indexer.celery import app
 
 from .repo import ensure_latest
 from .datasets import locate_bibxml_source_repo, locate_relaton_source_repo
