@@ -1,4 +1,6 @@
 /data
+/build
 /env
 /db.sqlite3
+.env
 *.pyc

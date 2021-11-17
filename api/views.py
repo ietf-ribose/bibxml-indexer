@@ -1,105 +1,171 @@
+import traceback
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_POST, require_GET
 
-from django.conf import settings
+from celery.result import AsyncResult
 
+from indexer.celery import app
+
+from .task_status import get_task_ids, push_task
+from .index import reset_index_for_dataset
 from .tasks import run_indexer
-from .utils import (
-    start_indexation,
-    reset_indexation,
-    stop_indexation,
-    get_index_info,
-    task_status,
-
-)
 
 
-from . import RD
-
-
+@require_GET
 def index(request):
-    return HttpResponse("API v1 index")
+    """Serves API index."""
+
+    return HttpResponse("""
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>API documentation</title>
+
+            <meta charset="utf-8"/>
+            <meta name="viewport"
+                content="width=device-width,
+                initial-scale=1">
+
+            <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+
+            <style>
+              body {
+                margin: 0;
+                padding: 0;
+              }
+            </style>
+          </head>
+          <body>
+            <redoc spec-url='/openapi.yaml'></redoc>
+            <script src="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js"></script>
+          </body>
+        </html>
+    """)
 
 
+@require_POST
 def api_run_indexer(request, dataset_name):
+    """Starts indexing for given dataset."""
 
-    if task_status(dataset_name) != "running":
-        indexer_task = run_indexer.delay(dataset_name)
-        RD.hset(dataset_name, "task_id", indexer_task.id)
+    # TODO: Quickly check sources for given dataset before queueing indexing
 
-        return JsonResponse(
-            {"data": {}}
-        )
-    else:
-        return JsonResponse(
-            {
-                "error": {
-                    "code": 0,
-                    "message": "%s indexation already running" % dataset_name,
-                }
-            },
-            status=500
-        )
+    refs_raw = request.POST.get('refs', None)
+    refs = refs_raw.split(',') if refs_raw else None
 
+    result = run_indexer.delay(dataset_name, refs)
+    task_id = result.id
 
-def api_stop_indexer(request, dataset_name):
+    if (task_id):
+        push_task(dataset_name, task_id)
 
-    if task_status(dataset_name) == "running":
-
-        task_id = stop_indexation(dataset_name)
-
-        return JsonResponse(
-            {
-                "data": {
-                    "message": "indexing '%s' task (%s) has been stopped"
-                    % (dataset_name, task_id),
-                }
-            }
-        )
-    else:
-        return JsonResponse(
-            {
-                "error": {
-                    "code": 0,
-                    "message": "'%s' indexation is not running" % dataset_name,
-                }
-            },
-            status=500
-        )
+    return JsonResponse({
+        "message": "Queued indexing for {} with task ID {}".format(
+            dataset_name,
+            task_id),
+    })
 
 
-def api_reset_indexer(request, dataset_name):
+@require_POST
+def api_reset_index(request, dataset_name):
+    """Clears index for dataset."""
 
-    reset_indexation(dataset_name)
+    reset_index_for_dataset(dataset_name)
 
-    return JsonResponse(
-        {
-            "data": {
-                "message": "'%s' index has been reset" % dataset_name,
-            }
-        }
-    )
+    return JsonResponse({
+        "message": "Index for {} had been reset".format(dataset_name),
+    })
 
 
+@require_GET
 def api_indexer_status(request, dataset_name):
+    """Retrieves information about latest indexing tasks for dataset."""
 
-    dataset = settings.RELATON_DATASETS.get(dataset_name, False)
+    task_ids = get_task_ids(dataset_name)
+    tasks = []
 
-    if dataset:
-        index_info = get_index_info(dataset_name)
-        return JsonResponse({"data": index_info})
+    for tid in task_ids:
+        result = AsyncResult(tid, app=app)
+        task = dict(task_id=tid, status=result.status)
 
+        meta = result.info or {}
+
+        if isinstance(meta, Exception):
+            task['error'] = dict(
+                type=repr(meta),
+                message='\n'.join(traceback.format_tb(meta.__traceback__)),
+            )
+
+        else:
+            task['requested_refs'] = meta.get('requested_refs', 'N/A')
+
+            total, indexed = \
+                meta.get('total', None), meta.get('indexed', None)
+
+            if result.successful():
+                task['outcome_summary'] = \
+                    "Succeeded (total: {}, indexed: {})".format(
+                        total if total is not None else 'N/A',
+                        indexed if indexed is not None else 'N/A')
+                if result.date_done:
+                    task['completed_at'] = \
+                        result.date_done.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+            elif result.failed():
+                err_msg = meta.get('exc_message', ['N/A'])
+                task['error'] = dict(
+                    type=meta.get('exc_type', 'N/A'),
+                    message='\n'.join(err_msg)
+                            if isinstance(err_msg, list)
+                            else repr(err_msg),
+                )
+
+            else:
+                task['action'] = meta.get('action', 'N/A')
+                progress = {}
+                if indexed is not None:
+                    progress['indexed'] = indexed
+                if total is not None:
+                    progress['total'] = total
+                task['progress'] = progress
+
+        tasks.append(task)
+
+    return JsonResponse({
+        "tasks": tasks,
+    })
+
+
+@require_POST
+def api_stop_task(request, task_id):
+    """Revokes and attempts to terminate a task given its ID."""
+
+    task = AsyncResult(task_id, app=app)
+    task.revoke(terminate=True)
+
+    return JsonResponse({
+        "message": "Task {} has been revoked".format(task_id),
+    })
+
+
+@require_POST
+def api_stop_all_tasks(request):
+    """Revokes any pending tasks, does not guarantee termination."""
+
+    app.control.purge()
+
+    try:
+        # TODO: Check that forced task termination works with stop-all
+        jobs = app.control.inspect().active()
+        for hostname in jobs:
+            tasks = jobs[hostname]
+            for task in tasks:
+                task = AsyncResult(task['id'], app=app)
+                task.revoke(terminate=True)
+    except:  # noqa: E722
+        return JsonResponse({
+            "message": "Pending tasks were revoked, active tasks may remain",
+        })
     else:
-        return JsonResponse({"error": {
-            "code": 0,
-            "message": "Unknown dataset name: %s" % dataset_name
-        }}, status=404)
-
-
-def api_list_indexers(request):
-
-    _indexable_datasets = {}
-
-    for _name in settings.RELATON_DATASETS:
-        _indexable_datasets[_name] = get_index_info(_name)
-
-    return JsonResponse({"data": _indexable_datasets})
+        return JsonResponse({
+            "message": "Pending tasks were revoked",
+        })
