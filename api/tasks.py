@@ -4,11 +4,12 @@ from os import path
 from indexer.celery import app
 from celery.utils.log import get_task_logger
 
-logger = get_task_logger(__name__)
-
 from .repo import ensure_latest
 from .datasets import locate_bibxml_source_repo, locate_relaton_source_repo
 from .utils import get_work_dir_path, index_dataset
+
+
+logger = get_task_logger(__name__)
 
 
 @app.task(bind=True)
