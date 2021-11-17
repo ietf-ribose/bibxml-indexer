@@ -35,9 +35,8 @@ services:
       - "5555:5555"
 
   celery:
+    build: .
     restart: always
-    build:
-      context: .
     command: celery -A indexer worker -l info -c 1
     volumes:
       - ./data/db:/var/lib/postgresql/data
