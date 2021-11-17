@@ -4,9 +4,13 @@ from os import path
 import glob
 import yaml
 
+from celery.utils.log import get_task_logger
 from django.db import transaction
 
 from .models import RefData
+
+
+logger = get_task_logger(__name__)
 
 
 yaml.SafeLoader.yaml_implicit_resolvers = {
@@ -85,7 +89,9 @@ def index_dataset(ds_id, bibxml_path, relaton_path, refs=None,
 
                             indexed_refs.add(ref)
                     else:
-                        print("Failed to read Relaton source corresponding to %s", bibxml_fpath)
+                        logger.warn(
+                            "Failed to read Relaton source for %s",
+                            bibxml_fpath)
 
         if refs is not None:
             # If we’re indexing a subset of refs,
