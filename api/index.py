@@ -59,7 +59,7 @@ def index_dataset(ds_id, bibxml_path, relaton_path, refs=None,
 
     with transaction.atomic():
         for idx, bibxml_fpath in enumerate(bibxml_source_files):
-            ref = path.splitext(bibxml_fpath)[0]
+            ref = path.splitext(path.basename(bibxml_fpath))[0]
 
             if refs is None or ref in requested_refs:
                 report_progress(total, idx)
