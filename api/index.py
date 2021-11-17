@@ -100,7 +100,7 @@ def index_dataset(ds_id, bibxml_path, relaton_path, refs=None,
             missing_refs = requested_refs - indexed_refs
             (RefData.objects.
                 filter(dataset=ds_id).
-                exclude(ref_id__in=missing_refs).
+                exclude(ref__in=missing_refs).
                 delete())
 
         else:
@@ -108,7 +108,7 @@ def index_dataset(ds_id, bibxml_path, relaton_path, refs=None,
             # delete all refs not found in source.
             (RefData.objects.
                 filter(dataset=ds_id).
-                exclude(ref_id__in=indexed_refs).
+                exclude(ref__in=indexed_refs).
                 delete())
 
     return total, len(indexed_refs)
