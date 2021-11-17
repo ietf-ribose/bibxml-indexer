@@ -69,19 +69,23 @@ def index_dataset(ds_id, bibxml_path, relaton_path, refs=None,
                     bibxml_data = bibxml_fhandler.read()
 
                     relaton_fpath = path.join(relaton_path, '%s.yaml' % ref)
-                    with open(relaton_fpath, 'r', encoding='utf-8') \
-                         as relaton_fhandler:
-                        ref_data = yaml.load(
-                            relaton_fhandler.read(),
-                            Loader=yaml.SafeLoader)
 
-                        RefData.objects.update_or_create(
-                            ref=ref,
-                            dataset=ds_id,
-                            body=ref_data,
-                            representations=dict(bibxml=bibxml_data))
+                    if path.exists(relaton_fpath):
+                        with open(relaton_fpath, 'r', encoding='utf-8') \
+                             as relaton_fhandler:
+                            ref_data = yaml.load(
+                                relaton_fhandler.read(),
+                                Loader=yaml.SafeLoader)
 
-                        indexed_refs.add(ref)
+                            RefData.objects.update_or_create(
+                                ref=ref,
+                                dataset=ds_id,
+                                body=ref_data,
+                                representations=dict(bibxml=bibxml_data))
+
+                            indexed_refs.add(ref)
+                    else:
+                        print("Failed to read Relaton source corresponding to %s", bibxml_fpath)
 
         if refs is not None:
             # If we’re indexing a subset of refs,
