@@ -25,9 +25,4 @@ class RefData(models.Model):
 
     class Meta:
         db_table = 'api_ref_data'
-
-        constraints = [
-            models.UniqueConstraint(
-                fields=['ref_id', 'dataset'],
-                name='unique_dataset_id')
-        ]
+        unique_together = [['ref', 'dataset']]
