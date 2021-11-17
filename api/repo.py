@@ -1,7 +1,11 @@
 """Utilities for dealing with Git."""
 
 from os import access, path, rmdir, R_OK
+from celery.utils.log import get_task_logger
 from git import Repo
+
+
+logger = get_task_logger(__name__)
 
 
 def reclone(repo_url, branch, work_dir):
@@ -30,7 +34,11 @@ def ensure_latest(repo_url, branch, work_dir):
         if all(['origin' in repo.remotes,
                 repo.remotes.origin.url == repo_url,
                 repo.active_branch.name == branch]):
-            repo.remotes.origin.pull(no_rebase=True)
+            try:
+                repo.remotes.origin.pull(branch, no_rebase=True)
+            except:  # noqa: E722
+                logger.exception("Failed to pull repository")
+                raise
 
         else:
             repo = reclone(repo_url, branch, work_dir)
