@@ -9,7 +9,7 @@ def locate_bibxml_source_repo(dataset_id):
     :param dataset_id: dataset ID as string
     :returns: tuple (repo_url, repo_branch)
     """
-    overrides = ((settings.DATASET_SOURCE_OVERRIDES or {}).
+    overrides = (getattr(settings, 'DATASET_SOURCE_OVERRIDES', {}).
                  get(dataset_id, {}).
                  get('bibxml_data', {}))
     return (
@@ -29,7 +29,7 @@ def locate_relaton_source_repo(dataset_id):
     :param dataset_id: dataset ID as string
     :returns: tuple (repo_url, repo_branch)
     """
-    overrides = ((settings.DATASET_SOURCE_OVERRIDES or {}).
+    overrides = (getattr(settings, 'DATASET_SOURCE_OVERRIDES', {}).
                  get(dataset_id, {}).
                  get('relaton_data', {}))
 
