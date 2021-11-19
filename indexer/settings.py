@@ -143,10 +143,9 @@ KNOWN_DATASETS = [
     '3gpp',
     'ieee',
     'iana',
-    'doi',
     'nist',
 ]
-"""A list of known dataset IDs.
+"""A list of known static dataset IDs.
 
 For up-to-date list of actually available datasets,
 see bibxml-data-* repositories under ietf-ribose GitHub organization.
