@@ -4,14 +4,20 @@ from django.shortcuts import render
 from django.conf import settings
 from django.http.request import split_domain_port
 
-from .task_status import get_dataset_task_history
+from .task_status import get_dataset_task_history, describe_indexing_task
+from .task_status import list_running_tasks
 
 
 def manage(request):
+    running_tasks = [
+        describe_indexing_task(tid)
+        for tid in list_running_tasks()]
+
     return render(request, 'manage.html', dict(
         api_secret=settings.API_SECRET,
         known_datasets=settings.KNOWN_DATASETS,
         authoritative_datasets=settings.AUTHORITATIVE_DATASETS,
+        running_tasks=running_tasks,
         task_monitor_host="{}:{}".format(
             split_domain_port(request.get_host())[0],
             5555),
