@@ -69,7 +69,7 @@ DATABASES = {
     }
 }
 
-# NOTE: This project isn’t intended to be used with Django’s auth,
+# NOTE: This project isn’t intended to be used with conventional Django auth,
 # hence this setting is empty.
 AUTH_PASSWORD_VALIDATORS = []
 
