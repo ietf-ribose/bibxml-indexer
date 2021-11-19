@@ -37,6 +37,13 @@ Then, run ``docker compose up`` from repository root.
 
 To check successful deployment, navigate to http://localhost:8000/api/v1/.
 
+Monitoring logs
+~~~~~~~~~~~~~~~
+
+::
+
+    % docker compose logs -f -t
+
 Invoking Django management commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
