@@ -22,9 +22,10 @@ Ensure requisite environment variables are configured in the environment.
 For convenience, you can put a file .env with contents like this::
 
     PORT=8001
+    API_SECRET="some-long-random-string"
     DB_NAME=foo
-    DB_SECRET="some-long-random-string"
-    DJANGO_SECRET="another-long-random-string"
+    DB_SECRET="another-long-random-string"
+    DJANGO_SECRET="more-long-random-string"
     HOST=localhost
 
 .. important::
@@ -44,18 +45,33 @@ Invoking Django management commands
 
 After which you are in a shell where you can invoke any ``python manage.py <command>``.
 
+
+Authentication
+--------------
+
+API endpoints require a token
+that matches ``API_SECRET`` environment variable at deploy time
+to be provided in ``HTTP_X_IETF_TOKEN`` header of each request.
+
+Management GUI is exposed under HTTP Basic auth,
+and requires the user to specify "ietf" as username
+and the above secret as password.
+
+.. important:: Basic HTTP auth implies proper HTTPS configuration must be in place.
+
+
 Using the API
 -------------
 
 An indexing task can be added to queue by querying an API endpoint
-of the form `<indexer domain>/api/v1/indexer/<dataset ID>/run`.
+of the form `<indexer domain>/api/v1/indexer/<dataset ID>/run/`.
 
 For example::
 
-    curl http://127.0.0.1:8001/api/v1/indexer/nist/run
+    curl http://127.0.0.1:8001/api/v1/indexer/nist/run/
 
 With properly configured infrastructure across bibxml-service and bibxml-indexer,
-given dataset will be indexed into a database accessible by bibxml-service APIs.
+given dataset will be indexed into a database accessible by bibxml-service instance.
 
 
 Datasets
@@ -74,6 +90,7 @@ These are the currently available datasets:
 * ``doi`` (bibxml9)
 * ``nist`` (no existing id)
 
+.. seealso:: ``KNOWN_DATASETS`` setting.
 
 
 Dataset sources
@@ -103,6 +120,9 @@ Django settings
 
 ``indexer.settings.DATASET_TMP_ROOT``
     Where to keep fetched source data and data generated during indexing.
+
+``indexer.settings.KNOWN_DATASETS``
+    A list of known dataset IDs.
 
 ``indexer.settings.DATASET_SOURCE_OVERRIDES``
     This setting can be used to override sources for a dataset

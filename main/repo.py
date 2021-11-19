@@ -13,7 +13,15 @@ def reclone(repo_url, branch, work_dir):
         rmdir(work_dir)
     except FileNotFoundError:
         pass
-    return Repo.clone_from(repo_url, work_dir, branch=branch)
+
+    repo = Repo.clone_from(repo_url, work_dir, branch=branch)
+
+    # Set name and email; may be required when pulling
+    repo.config_writer().set_value("user", "name", "ci").release()
+    repo.config_writer().set_value("user", "email", "ci@local").release()
+
+    return repo
+
 
 
 def ensure_latest(repo_url, branch, work_dir):

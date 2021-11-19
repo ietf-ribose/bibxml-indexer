@@ -158,22 +158,11 @@ components:
 
     IndexableDatasets:
       type: string
-      # TODO: Auto-generate this list at deployment time?
       enum:
-      - rfcs
-      - ids
-      - rfcsubseries
-      - misc
-      - w3c
-      - 3gpp
-      - ieee
-      - iana
-      - doi
-      - nist
-      description: |
-        For up-to-date list of available datasets,
-        see bibxml-data-* repositories under ietf-ribose GitHub organization.
-        See also bibxml-indexer service README.
+      {% for ds_id in known_dataset_ids %}
+      - {{ ds_id }}
+      {% endfor %}
+      description: Known dataset IDs.
 
     SuccessMessage:
       type: object

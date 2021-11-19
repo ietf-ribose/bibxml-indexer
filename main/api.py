@@ -1,17 +1,16 @@
-import traceback
+"""View functions for API endpoints."""
+
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.http import require_POST, require_GET
 
 from celery.result import AsyncResult
 
 from indexer.celery import app
 
-from .task_status import get_task_ids, push_task
+from .task_status import get_dataset_task_history, push_task
 from .index import reset_index_for_dataset
-from .tasks import run_indexer
+from .tasks import fetch_and_index
 
 
-@require_GET
 def index(request):
     """Serves API index."""
 
@@ -43,8 +42,7 @@ def index(request):
     """)
 
 
-@require_POST
-def api_run_indexer(request, dataset_name):
+def run_indexer(request, dataset_name):
     """Starts indexing for given dataset."""
 
     # TODO: Quickly check sources for given dataset before queueing indexing
@@ -52,7 +50,7 @@ def api_run_indexer(request, dataset_name):
     refs_raw = request.POST.get('refs', None)
     refs = refs_raw.split(',') if refs_raw else None
 
-    result = run_indexer.delay(dataset_name, refs)
+    result = fetch_and_index.delay(dataset_name, refs)
     task_id = result.id
 
     if (task_id):
@@ -65,8 +63,7 @@ def api_run_indexer(request, dataset_name):
     })
 
 
-@require_POST
-def api_reset_index(request, dataset_name):
+def reset_index(request, dataset_name):
     """Clears index for dataset."""
 
     reset_index_for_dataset(dataset_name)
@@ -76,67 +73,15 @@ def api_reset_index(request, dataset_name):
     })
 
 
-@require_GET
-def api_indexer_status(request, dataset_name):
+def indexer_status(request, dataset_name):
     """Retrieves information about latest indexing tasks for dataset."""
 
-    task_ids = get_task_ids(dataset_name)
-    tasks = []
-
-    for tid in task_ids:
-        result = AsyncResult(tid, app=app)
-        task = dict(task_id=tid, status=result.status)
-
-        meta = result.info or {}
-
-        if isinstance(meta, Exception):
-            task['error'] = dict(
-                type=repr(meta),
-                message='\n'.join(traceback.format_tb(meta.__traceback__)),
-            )
-
-        else:
-            task['requested_refs'] = meta.get('requested_refs', 'N/A')
-
-            total, indexed = \
-                meta.get('total', None), meta.get('indexed', None)
-
-            if result.successful():
-                task['outcome_summary'] = \
-                    "Succeeded (total: {}, indexed: {})".format(
-                        total if total is not None else 'N/A',
-                        indexed if indexed is not None else 'N/A')
-                if result.date_done:
-                    task['completed_at'] = \
-                        result.date_done.strftime('%Y-%m-%dT%H:%M:%SZ')
-
-            elif result.failed():
-                err_msg = meta.get('exc_message', ['N/A'])
-                task['error'] = dict(
-                    type=meta.get('exc_type', 'N/A'),
-                    message='\n'.join(err_msg)
-                            if isinstance(err_msg, list)
-                            else repr(err_msg),
-                )
-
-            else:
-                task['action'] = meta.get('action', 'N/A')
-                progress = {}
-                if indexed is not None:
-                    progress['indexed'] = indexed
-                if total is not None:
-                    progress['total'] = total
-                task['progress'] = progress
-
-        tasks.append(task)
-
     return JsonResponse({
-        "tasks": tasks,
+        "tasks": get_dataset_task_history(dataset_name),
     })
 
 
-@require_POST
-def api_stop_task(request, task_id):
+def stop_task(request, task_id):
     """Revokes and attempts to terminate a task given its ID."""
 
     task = AsyncResult(task_id, app=app)
@@ -147,8 +92,7 @@ def api_stop_task(request, task_id):
     })
 
 
-@require_POST
-def api_stop_all_tasks(request):
+def stop_all_tasks(request):
     """Revokes any pending tasks, does not guarantee termination."""
 
     app.control.purge()

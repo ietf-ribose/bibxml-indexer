@@ -38,6 +38,7 @@ services:
     ports:
       - "${PORT:?missing port to expose API and GUI under}:8000"
     environment:
+      API_SECRET: "${API_SECRET:?missing API secret}"
       DATASET_TMP_ROOT: "/code/datasets"
       PRIMARY_HOSTNAME: ${HOST:?missing main hostname (e.g., localhost for development)}
       DEBUG: ${DEBUG:-0}

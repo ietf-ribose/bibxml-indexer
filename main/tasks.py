@@ -15,7 +15,7 @@ logger = get_task_logger(__name__)
 
 
 @app.task(bind=True)
-def run_indexer(task, dataset_id, refs=None):
+def fetch_and_index(task, dataset_id, refs=None):
     """(Re)indexes given dataset.
 
     :param refs: a list of refs to index,
@@ -129,6 +129,7 @@ def run_indexer(task, dataset_id, refs=None):
             dataset_id)
         traceback.print_exc()
         print("Indexing {}: Task aborted with SystemExit".format(dataset_id))
+        raise
 
     except:  # noqa: E722
         logger.exception(

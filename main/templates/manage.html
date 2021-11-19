@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <p class="f5 lh-copy">
+    Choose a dataset.
+  </p>
+  <div class="pv5">
+    <h2 class="f5">See also</h2>
+    <ul class="list pl0">
+      <li>
+        <a href="{% url "api_index" %}" target="_blank" class="link">
+          API reference &rarr;
+        </a>
+      <li>
+        <a href="//{{ task_monitor_host }}" target="_blank" class="link">
+          Worker dashboard at {{ task_monitor_host }} &rarr;
+        </a>
+    </ul>
+  </div>
+{% endblock %}
