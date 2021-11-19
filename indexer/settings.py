@@ -151,6 +151,14 @@ For up-to-date list of actually available datasets,
 see bibxml-data-* repositories under ietf-ribose GitHub organization.
 """
 
+AUTHORITATIVE_DATASETS = [
+    'rfcs',
+    'ids',
+    'rfcsubseries',
+]
+"""A list of authoritative datasets.
+"""
+
 # TODO: Update DATASET_SOURCE_OVERRIDES setting according to currently available Github repos and their branch names
 # TODO: Extract DATASET_SOURCE_OVERRIDES from environment
 DATASET_SOURCE_OVERRIDES = {

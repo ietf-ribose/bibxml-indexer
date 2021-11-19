@@ -11,6 +11,7 @@ def manage(request):
     return render(request, 'manage.html', dict(
         api_secret=settings.API_SECRET,
         known_datasets=settings.KNOWN_DATASETS,
+        authoritative_datasets=settings.AUTHORITATIVE_DATASETS,
         task_monitor_host="{}:{}".format(
             split_domain_port(request.get_host())[0],
             5555),
@@ -23,4 +24,5 @@ def manage_dataset(request, dataset_id):
         history=get_dataset_task_history(dataset_id),
         api_secret=settings.API_SECRET,
         known_datasets=settings.KNOWN_DATASETS,
+        authoritative_datasets=settings.AUTHORITATIVE_DATASETS,
     ))
