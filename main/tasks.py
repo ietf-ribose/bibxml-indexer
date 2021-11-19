@@ -64,7 +64,7 @@ def fetch_and_index(task, dataset_id, refs=None):
 
         bibxml_data_dir = path.join(bibxml_work_dir_path, 'data')
 
-        # TODO: Use relaton-bib-py to generate Relaton data
+        # TODO: #25 Use relaton-bib-py to generate Relaton data
 
         relaton_repo_url, relaton_repo_branch = \
             locate_relaton_source_repo(dataset_id)
