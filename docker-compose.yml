@@ -32,7 +32,7 @@ services:
       - .:/code
     hostname: web-indexer
     ports:
-      - "${PORT:?missing port to expose web service under}:8000"
+      - "${PORT:?missing port to expose API and GUI under}:8000"
     environment:
       PRIMARY_HOSTNAME: ${HOST:?missing main hostname (e.g., localhost for development)}
       DEBUG: ${DEBUG:-0}
