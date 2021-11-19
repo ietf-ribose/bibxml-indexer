@@ -216,6 +216,10 @@ components:
               status:
                 type: string
                 description: Short status keyword (e.g., STARTED, PROGRESS, FAILED or similar; not strictly normalized)
+
+              dataset_id:
+                format: string
+                description: Dataset ID
               requested_refs:
                 type: array
                 description: Refs that were requested for indexing
