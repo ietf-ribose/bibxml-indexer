@@ -140,8 +140,9 @@ def describe_indexing_task(tid: str) -> IndexingTaskDescription:
 
         task['dataset_id'] = meta.get('dataset_id', 'N/A')
 
+        prog = meta.get('progress', {})
         total, current = \
-            meta.get('total', None), meta.get('current', None)
+            prog.get('total', None), prog.get('current', None)
 
         if result.successful():
             task['outcome_summary'] = \
