@@ -208,18 +208,19 @@ components:
             description: Describes indexing task
             required:
               - task_id
+              - status
             properties:
               task_id:
                 format: string
                 description: Task ID; can be used to cancel this task using the tasks endpoint
+              status:
+                type: string
+                description: Short status keyword (e.g., STARTED, PROGRESS, FAILED or similar; not strictly normalized)
               requested_refs:
                 type: array
                 description: Refs that were requested for indexing
                 items:
                   type: string
-              status:
-                type: string
-                description: Short status keyword (e.g., STARTED, PROGRESS, FAILED or similar; not strictly normalized)
 
               started_at:
                 type: string
