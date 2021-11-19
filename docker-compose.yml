@@ -18,8 +18,8 @@ services:
       - bibxml_indexer_db_net
 
   web:
-    restart: "on-failure:10"
     build: .
+    restart: "on-failure:10"
     command:
       - /bin/sh
       - -c
@@ -34,6 +34,7 @@ services:
     ports:
       - "${PORT:?missing port to expose API and GUI under}:8000"
     environment:
+      DATASET_TMP_ROOT: "/code/datasets"
       PRIMARY_HOSTNAME: ${HOST:?missing main hostname (e.g., localhost for development)}
       DEBUG: ${DEBUG:-0}
       DJANGO_SECRET: "${DJANGO_SECRET:?missing Django secret (long random string)}"
@@ -46,7 +47,6 @@ services:
       CELERY_RESULT_BACKEND: "redis://redis:6379"
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      DATASET_TMP_ROOT: "/code/datasets"
     depends_on:
       - db
       - redis
@@ -60,6 +60,7 @@ services:
       - ./data/datasets:/code/datasets
     environment:
       PRIMARY_HOSTNAME: ${HOST:?err}
+      DATASET_TMP_ROOT: "/code/datasets"
       DEBUG: ${DEBUG:-0}
       DJANGO_SECRET: "${DJANGO_SECRET:?err}"
       DB_HOST: db
@@ -71,7 +72,6 @@ services:
       CELERY_RESULT_BACKEND: "redis://redis:6379"
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      DATASET_TMP_ROOT: "/code/datasets"
     depends_on:
       - web
       - db
