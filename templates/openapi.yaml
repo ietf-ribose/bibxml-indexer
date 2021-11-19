@@ -232,13 +232,13 @@ components:
                 description: For a task in progress, completion progress
                 type: object
                 required:
-                  - indexed
+                  - current
                 properties:
                   total:
-                    description: Total number of source files found
+                    description: Total, e.g. number of source files found
                     type: integer
-                  indexed:
-                    description: Total number of indexed files
+                  current:
+                    description: Current item, e.g. number of indexed files so far
                     type: integer
 
               completed_at:
