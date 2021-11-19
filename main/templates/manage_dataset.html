@@ -7,13 +7,9 @@
 
 {% block content %}
   <div class="flex items-center">
-    <h2 class="f4 dib br3 ttu">{{ dataset_id }}</h2>
-    <a
-        class="f5 link dim br3 pa2 ph3 ml3 dib ba b--light-gray"
-        role="button"
-        href="javascript: callIndexerAPI('{% url "api_run_indexer" dataset_id %}', 'POST')">
-      Queue reindex
-    </a>
+    <h2 class="f4 dib br3 ttu mr4">{{ dataset_id }}</h2>
+    {% url "api_run_indexer" dataset_id as reindex_url %}
+    {% include "api_button.html" with label="Queue reindex" endpoint=reindex_url method="POST" %}
   </div>
 
   <ul class="list pl0">
