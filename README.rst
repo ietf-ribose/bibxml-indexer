@@ -19,7 +19,8 @@ Running locally using Docker Desktop and Compose
 ------------------------------------------------
 
 Ensure requisite environment variables are configured in the environment.
-For convenience, you can put a file .env with contents like this::
+For convenience, you can place in repository root a file `.env`
+with contents like this::
 
     PORT=8001
     API_SECRET="some-long-random-string"
