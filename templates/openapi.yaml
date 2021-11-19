@@ -16,7 +16,7 @@ servers:
 - url: /api/v1
 
 paths:
-  /indexer/{dataset}/run:
+  /indexer/{dataset}/run/:
     parameters:
     - name: dataset
       in: path
@@ -60,7 +60,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorMessage'
 
-  /indexer/{dataset}/reset:
+  /indexer/{dataset}/reset/:
     parameters:
     - name: dataset
       in: path
@@ -86,7 +86,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorMessage'
 
-  /indexer/{dataset}/status:
+  /indexer/{dataset}/status/:
     parameters:
     - name: dataset
       in: path
@@ -106,7 +106,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/IndexerStatus'
 
-  /tasks/{task_id}/stop:
+  /tasks/{task_id}/stop/:
     parameters:
     - name: task_id
       in: path
@@ -133,7 +133,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorMessage'
 
-  /tasks/stop-all:
+  /tasks/stop-all/:
     post:
       summary: Revoke all tasks
       description: Revokes any pending tasks. Try to terminate already running ones, but no guarantees.
