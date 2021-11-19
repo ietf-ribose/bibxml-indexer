@@ -23,7 +23,6 @@ def reclone(repo_url, branch, work_dir):
     return repo
 
 
-
 def ensure_latest(repo_url, branch, work_dir):
     """If specified working directory contains a Git repo
     matching provided configuration (URL and branch), performs a pull.
