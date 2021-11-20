@@ -1,6 +1,6 @@
-============================
-BibXML indexer service & API
-============================
+==============
+BibXML Indexer
+==============
 
 For an overview, see https://github.com/ietf-ribose/bibxml-project.
 
