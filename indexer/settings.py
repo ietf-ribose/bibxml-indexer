@@ -119,6 +119,11 @@ REDIS_HOST = environ.get('REDIS_HOST')
 REDIS_PORT = environ.get('REDIS_PORT')
 
 
+# Version
+
+SNAPSHOT = environ.get('SNAPSHOT', None)
+
+
 # BibXML-specific
 
 API_USER = 'ietf'
