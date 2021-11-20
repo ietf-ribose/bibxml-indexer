@@ -18,6 +18,9 @@ This project uses Docker, Django, Celery, Redis and PostgreSQL.
 Running locally using Docker Desktop and Compose
 ------------------------------------------------
 
+It is required to run Compose from repository root
+(.git directory must be present).
+
 Ensure requisite environment variables are configured in the environment.
 For convenience, you can place in repository root a file `.env`
 with contents like this::
