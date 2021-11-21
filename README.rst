@@ -20,8 +20,8 @@ This project uses Docker, Django, Celery, Redis and PostgreSQL.
 Quick start with Docker Desktop and Compose
 -------------------------------------------
 
-Setup
-~~~~~
+Setting up
+~~~~~~~~~~
 
 It is required to run Compose from repository root
 (.git directory must be present).
