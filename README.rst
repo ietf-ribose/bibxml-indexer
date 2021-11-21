@@ -113,7 +113,7 @@ By default,
 * ``relaton-data-{dataset_id}`` repositories under ``relaton`` Github user are treated as Relaton sources
   (until ``relaton-bib-py`` library takes care of conversion).
 
-Default branch is main.
+Default branch name is ``main``.
 
 .. seealso:: ``DATASET_SOURCE_OVERRIDES`` setting.
 
