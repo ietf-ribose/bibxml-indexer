@@ -69,7 +69,7 @@ After which you are in a shell where you can invoke any ``python manage.py <comm
 Invoking API
 ~~~~~~~~~~~~
 
-See API spec at http://localhost:8000/api/v1/.
+See API spec at http://localhost:8001/api/v1/.
 
 Example request triggering a reindex::
 
