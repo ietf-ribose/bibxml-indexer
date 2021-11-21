@@ -6,6 +6,8 @@ For an overview, see https://github.com/ietf-ribose/bibxml-project.
 
 This project uses Docker, Django, Celery, Redis and PostgreSQL.
 
+.. contents::
+
 .. note::
 
    Django settings file makes heavy use of environment variables,
@@ -15,8 +17,11 @@ This project uses Docker, Django, Celery, Redis and PostgreSQL.
    (the old-style conventional way of running under a venv isn’t).
 
 
-Running locally using Docker Desktop and Compose
-------------------------------------------------
+Quick start with Docker Desktop and Compose
+-------------------------------------------
+
+Setup
+~~~~~
 
 It is required to run Compose from repository root
 (.git directory must be present).
@@ -31,34 +36,51 @@ with contents like this::
     DB_SECRET="another-long-random-string"
     DJANGO_SECRET="more-long-random-string"
     HOST=localhost
+    DEBUG=1
 
 .. important::
 
-   DEBUG must not be set to 1 in production.
+   Do not use this environment in production. Refer to operations documentation.
 
-Then, run ``docker compose up`` from repository root.
+Running
+~~~~~~~
 
-To check successful deployment, navigate to http://localhost:8000/api/v1/.
+From repository root::
+
+    docker compose up
 
 Monitoring logs
 ~~~~~~~~~~~~~~~
 
 ::
 
-    % docker compose logs -f -t
+    docker compose logs -f -t
 
 Invoking Django management commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
-    % docker compose exec web bash
+    docker compose exec web bash
 
 After which you are in a shell where you can invoke any ``python manage.py <command>``.
 
 
+Invoking API
+~~~~~~~~~~~~
+
+See API spec at http://localhost:8000/api/v1/.
+
+Example request triggering a reindex::
+
+    curl -i -X POST -H "HTTP-X-IETF-token: some-long-random-string" localhost:8001/api/v1/indexer/nist/run
+
+With properly configured infrastructure across bibxml-service and bibxml-indexer,
+given dataset will be indexed into a database accessible by bibxml-service instance.
+
+
 Authentication
---------------
+~~~~~~~~~~~~~~
 
 API endpoints require a token
 that matches ``API_SECRET`` environment variable at deploy time
@@ -66,46 +88,15 @@ to be provided in ``HTTP_X_IETF_TOKEN`` header of each request.
 
 Management GUI is exposed under HTTP Basic auth,
 and requires the user to specify "ietf" as username
-and the above secret as password.
-
-.. important:: Basic HTTP auth implies proper HTTPS configuration must be in place.
-
-
-Using the API
--------------
-
-An indexing task can be added to queue by querying an API endpoint
-of the form `<indexer domain>/api/v1/indexer/<dataset ID>/run/`.
-
-For example::
-
-    curl http://127.0.0.1:8001/api/v1/indexer/nist/run/
-
-With properly configured infrastructure across bibxml-service and bibxml-indexer,
-given dataset will be indexed into a database accessible by bibxml-service instance.
-
-
-Datasets
---------
-
-These are the currently available datasets:
-
-* ``rfcs`` (bibxml)
-* ``ids`` (bibxml3)
-* ``rfcsubseries`` (bibxml9)
-* ``misc`` (bibxml2)
-* ``w3c`` (bibxml4)
-* ``3gpp`` (bibxml5)
-* ``ieee`` (bibxml6)
-* ``iana`` (bibxml8)
-* ``doi`` (bibxml9)
-* ``nist`` (no existing id)
-
-.. seealso:: ``KNOWN_DATASETS`` setting.
+and the above API secret as password.
 
 
 Dataset sources
 ---------------
+
+Indexer accepts any string as dataset ID,
+but if indexing is requested for nonexistent dataset,
+indexing will fail due to missing source data.
 
 By default,
 
