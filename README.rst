@@ -135,6 +135,16 @@ Django settings
 ``indexer.settings.KNOWN_DATASETS``
     A list of known dataset IDs.
 
+``indexer.settings.AUTHORITATIVE_DATASETS``
+    A list of dataset IDs corresponding to IETF authoritative datasets.
+
+``indexer.settings.API_USER``
+    Username that will be required by GUI using HTTP Basic authentication.
+
+``indexer.settings.API_SECRET``
+    Secret that will be required in header to trigger API endpoints,
+    and as password for HTTP Basic authentication when using GUI.
+
 ``indexer.settings.DATASET_SOURCE_OVERRIDES``
     This setting can be used to override sources for a dataset
     by mapping dataset ID to dataset source configuration.
