@@ -167,63 +167,7 @@ AUTHORITATIVE_DATASETS = [
 """A list of authoritative datasets.
 """
 
-# TODO: Update DATASET_SOURCE_OVERRIDES setting according to currently available Github repos and their branch names
-# TODO: Extract DATASET_SOURCE_OVERRIDES from environment
-DATASET_SOURCE_OVERRIDES = {
-    'rfcsubseries': {
-        'bibxml_data': {
-            'repo_branch': 'master',
-        },
-    },
-    # "ecma": {
-    #         "bibxml_data": {
-    #             "git_remote_url": "git://github.com/ietf-ribose/bibxml-data-ecma.git",
-    #             "git_branch": "main",
-    #         },
-    #         "relaton_data": {
-    #             "git_remote_url": "git://github.com/relaton/relaton-data-ecma.git",
-    #             "git_branch": "master",
-    #         },
-    #     },
-    # "nist": {
-    #         "git_remote_url": "git://github.com/relaton/relaton-data-nist.git",
-    #         "git_branch": "main",
-    #         "local_repo_dir": "relaton-data-nist"
-    #     },
-    # "ietf": {
-    #         "git_remote_url": "git://github.com/relaton/relaton-data-ietf.git",
-    #         "git_branch": "main",
-    #         "local_repo_dir": "relaton-data-ietf"
-    #     },
-    # "itu-r": {
-    #         "git_remote_url": "git://github.com/relaton/relaton-data-itu-r.git",
-    #         "git_branch": "master",
-    #         "local_repo_dir": "relaton-data-itu-r"
-    #     },
-    # "calconnect": {
-    #         "git_remote_url": "git://github.com/relaton/relaton-data-calconnect.git",
-    #         "git_branch": "main",
-    #         "local_repo_dir": "relaton-data-calconnect"
-    #     },
-    # "cie": {
-    #         "git_remote_url": "git://github.com/relaton/relaton-data-cie.git",
-    #         "git_branch": "master",
-    #         "local_repo_dir": "relaton-data-cie"
-    #     },
-    # "iso": {
-    #         "git_remote_url": "git://github.com/relaton/relaton-data-iso.git",
-    #         "git_branch": "main",
-    #         "local_repo_dir": "relaton-data-iso"
-    #     },
-    # "bipm": {
-    #         "git_remote_url": "git://github.com/relaton/relaton-data-bipm.git",
-    #         "git_branch": "master",
-    #         "local_repo_dir": "relaton-data-bipm"
-    #     },
-    # "iho": {
-    #         "git_remote_url": "git://github.com/relaton/relaton-data-iho.git",
-    #         "git_branch": "master",
-    #         "local_repo_dir": "relaton-data-iho"
-    #     },
-}
+
+# TODO: Extract DATASET_SOURCE_OVERRIDES from environment?
+DATASET_SOURCE_OVERRIDES = {}
 """Overrides dataset bibxml and/or relaton source. Supports partial override."""
