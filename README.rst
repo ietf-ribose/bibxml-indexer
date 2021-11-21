@@ -159,3 +159,9 @@ Django settings
         }
 
     .. note:: ``relaton_data`` property will be deprecated once ``relaton-bib-py`` library is integrated.
+
+
+Credits
+-------
+
+Authored by Ribose as produced under the IETF BibXML SOW.
