@@ -169,5 +169,11 @@ AUTHORITATIVE_DATASETS = [
 
 
 # TODO: Extract DATASET_SOURCE_OVERRIDES from environment?
-DATASET_SOURCE_OVERRIDES = {}
+DATASET_SOURCE_OVERRIDES = {
+    'ieee': {
+        'relaton_data': {
+            'repo_url': 'git://github.com/ietf-ribose/relaton-data-ieee.git',
+        },
+    },
+}
 """Overrides dataset bibxml and/or relaton source. Supports partial override."""
