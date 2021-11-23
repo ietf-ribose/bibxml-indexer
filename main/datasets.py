@@ -37,7 +37,7 @@ def locate_relaton_source_repo(dataset_id):
         overrides.get(
             'repo_url',
             GITHUB_REPO_URL.format(
-                user='relaton',
+                user='ietf-ribose',
                 repo='relaton-data-%s' % dataset_id)),
         overrides.get('repo_branch', 'main'),
     )
