@@ -149,11 +149,11 @@ Django settings
         DATASET_SOURCE_OVERRIDES = {
             "ecma": {
                 "bibxml_data": {
-                    "git_remote_url": "git://<SOME URL>.git",
-                    "git_branch": "main",
+                    "repo_url": "git://<SOME URL>.git",
+                    "repo_branch": "main",
                 },
                 "relaton_data": {
-                    "git_branch": "master",
+                    "repo_branch": "master",
                 },
             },
         }
