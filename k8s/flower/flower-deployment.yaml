@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: flower
+  name: flower
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flower
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: flower
+    spec:
+      containers:
+        - env:
+            - name: CELERY_BROKER_URL
+              value: redis://redis-service:6379
+            - name: CELERY_RESULT_BACKEND
+              value: redis://redis-service:6379
+          image: mher/flower
+          name: flower
+          ports:
+            - containerPort: 5555
+          resources: {}
+      hostname: flower
+      restartPolicy: Always
+status: {}
