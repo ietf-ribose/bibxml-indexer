@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migration
+spec:
+  template:
+    spec:
+      containers:
+        - name: db-migration
+          image: bibxml/base
+          imagePullPolicy: Never
+          command: ["/bin/sh"]
+          args: ["-c", "python manage.py migrate"]
+          env:
+            - name: CELERY_BROKER_URL
+              value: redis://redis-service:6379
+            - name: CELERY_RESULT_BACKEND
+              value: redis://redis-service:6379
+            - name: DATASET_TMP_ROOT
+              value: /code/datasets
+            - name: DB_HOST
+              value: db-service
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: user
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: user
+            - name: DEBUG
+              value: "0"
+            - name: DJANGO_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: django-credentials
+                  key: secret
+            - name: PRIMARY_HOSTNAME
+              value: localhost
+            - name: REDIS_HOST
+              value: redis-service
+            - name: REDIS_PORT
+              value: "6379"
+      restartPolicy: Never
+  backoffLimit: 5
