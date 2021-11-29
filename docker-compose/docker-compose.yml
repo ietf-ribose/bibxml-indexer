@@ -50,8 +50,8 @@ services:
       DB_USER: ${DB_NAME:?err}
       DB_NAME: ${DB_NAME:?err}
       DB_SECRET: "${DB_SECRET:?err}"
-      CELERY_BROKER_URL: "redis://redis-service:6379"
-      CELERY_RESULT_BACKEND: "redis://redis-service:6379"
+      CELERY_BROKER_URL: "redis://redis:6379"
+      CELERY_RESULT_BACKEND: "redis://redis:6379"
       REDIS_HOST: redis
       REDIS_PORT: 6379
       PYTHONUNBUFFERED: 1
@@ -76,8 +76,8 @@ services:
       DB_USER: ${DB_NAME:?err}
       DB_NAME: ${DB_NAME:?err}
       DB_SECRET: ${DB_SECRET:?err}
-      CELERY_BROKER_URL: "redis://redis-service:6379"
-      CELERY_RESULT_BACKEND: "redis://redis-service:6379"
+      CELERY_BROKER_URL: "redis://redis:6379"
+      CELERY_RESULT_BACKEND: "redis://redis:6379"
       REDIS_HOST: redis
       REDIS_PORT: 6379
       PYTHONUNBUFFERED: 1
@@ -90,8 +90,8 @@ services:
     image: mher/flower
     hostname: flower
     environment:
-      CELERY_BROKER_URL: "redis://redis-service:6379"
-      CELERY_RESULT_BACKEND: "redis://redis-service:6379"
+      CELERY_BROKER_URL: "redis://redis:6379"
+      CELERY_RESULT_BACKEND: "redis://redis:6379"
     depends_on:
       - celery
     ports:
