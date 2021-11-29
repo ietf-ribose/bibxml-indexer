@@ -12,56 +12,143 @@ This project uses Docker, Django, Celery, Redis and PostgreSQL.
 
    Django settings file makes heavy use of environment variables,
    without which project initialization will fail.
-   In local development it’s recommended to use Docker Desktop & Docker Compose,
-   and currently only that method is covered
-   (the old-style conventional way of running under a venv isn’t).
+   In local development it’s recommended to use Docker Desktop & minikube,
+   and currently only that method is covered.
 
 
-Quick start with Docker Desktop and Compose
--------------------------------------------
+Quick start with Docker Desktop and minikube
+--------------------------------------------
 
-Setting up
-~~~~~~~~~~
+Prerequisite
+~~~~~~~~~~~~
 
-It is required to run Compose from repository root
-(.git directory must be present).
+* Install Docker Docker
 
-Ensure requisite environment variables are set.
-For convenience, you can place in repository root a file `.env`
-with contents like this::
+* Install minikube (a tool for running Kubernetes locally)
 
-    PORT=8001
-    API_SECRET="some-long-random-string"
-    DB_NAME=foo
-    DB_SECRET="another-long-random-string"
-    DJANGO_SECRET="more-long-random-string"
-    HOST=localhost
-    DEBUG=1
+
+Using minikube
+~~~~~~~~~~~~~~
+
+Run Docker Desktop.
+
+Start minikube ::
+
+    minikube start
+
+Start Minikube with logs ::
+
+    minikube start --driver=docker --alsologtostderr
+
+
+Show minikube dashboard in browser ::
+
+    minikube dashboard --url=false
+
+
+Clear local state ::
+
+    minikube delete
+
+
+Steps to test bibxml-indexer and bibxml-service
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Go to bibxml-indexer source folder ::
+
+    cd ~/path/to/bibxml-indexer
+
+Start minikube ::
+
+    minikube start
+
+Set docker environment ::
+
+    eval $(minikube -p minikube docker-env)
+
+Show minikube dashboard ::
+
+    minikube dashboard --url=false
+
+Create redis, db, network, secret in Kubernetes in a new terminal ::
+
+    eval $(minikube -p minikube docker-env)
+    kubectl apply -f k8s/redis
+    kubectl apply -f k8s/db
+    kubectl apply -f k8s/network
+    kubectl apply -f k8s/secret
+
+Check whether pods, services and secrets are set up properly ::
+
+    kubectl get po,svc,secret
+
+
+Build docker image locally ::
+
+    docker build -t bibxml/base .
+
+Apply db migration ::
+
+    kubectl apply -f k8s/job/db-migration.yaml
+
+Check migration is completed ::
+
+    kubectl get po
+
+Remove completed job (Optional) ::
+
+    kubectl delete -f k8s/job/db-migration.yaml
+
+Create web, celery, flower ::
+
+    kubectl apply -f k8s/web
+    kubectl apply -f k8s/celery
+    kubectl apply -f k8s/flower
+
+Check whether pods and services ::
+
+    kubectl get po,svc
+
+Go to bibxml-service source folder ::
+
+    cd ~/path/to/bibxml-service
+
+Create bibxml-service in a new terminal ::
+
+    eval $(minikube -p minikube docker-env)
+    kubectl apply -f k8s/ws
+
+Check whether bibxml-service is running ::
+
+    kubectl get po,svc
 
 .. important::
 
-   Do not use this environment in production. Refer to operations documentation.
+   Do not use this secrets and environment in production. Refer to operations documentation.
 
-Running
-~~~~~~~
+   Secret and environment variables are store in YAML files under k8s folder.
 
-From repository root::
+   Some secrets are encoded in base64 format.
 
-    docker compose up
 
 Monitoring logs
 ~~~~~~~~~~~~~~~
 
-::
+Check names and statuses of pods ::
 
-    docker compose logs -f -t
+    kubectl get po
+
+Get logs ::
+
+    kubectl logs <name_of_pod>
+
 
 Invoking Django management commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
-    docker compose exec web bash
+    kubectl run -i --tty --attach web --image=bibxml/base --image-pull-policy=Never -- sh
 
 After which you are in a shell where you can invoke any ``python manage.py <command>``.
 
