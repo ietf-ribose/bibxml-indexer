@@ -30,7 +30,7 @@ Ensure requisite environment variables are set.
 For convenience, you can place in repository root a file `.env`
 with contents like this::
 
-    PORT=8001
+    PORT=8000
     API_SECRET="some-long-random-string"
     DB_NAME=foo
     DB_SECRET="another-long-random-string"
@@ -69,11 +69,11 @@ After which you are in a shell where you can invoke any ``python manage.py <comm
 Invoking API
 ~~~~~~~~~~~~
 
-See API spec at http://localhost:8001/api/v1/.
+See API spec at http://localhost:8000/api/v1/.
 
 Example request triggering a reindex::
 
-    curl -i -X POST -H "X-IETF-token: some-long-random-string" localhost:8001/api/v1/indexer/nist/run
+    curl -i -X POST -H "X-IETF-token: some-long-random-string" localhost:8000/api/v1/indexer/nist/run
 
 With properly configured infrastructure across bibxml-service and bibxml-indexer,
 given dataset will be indexed into a database accessible by bibxml-service instance.
